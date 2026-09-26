@@ -27,10 +27,19 @@
         <header class="verdict-top">
           <div>
             <p class="verdict-label">AI Model Prediction</p>
-            <h2>{{ prediction.predicted_label }}</h2>
+            <h2 class="verdict-title">{{ icon('x' if is_fake else 'check', 26) }} {{ prediction.predicted_label }}</h2>
           </div>
           <div class="verdict-score">
-            <strong>{{ conf }}%</strong>
+            <span class="score-ring" aria-hidden="true">
+              <svg viewBox="0 0 120 120">
+                <g transform="rotate(-90 60 60)">
+                  <circle class="score-ring-track" cx="60" cy="60" r="52"/>
+                  <circle class="score-ring-fill" cx="60" cy="60" r="52"
+                          stroke-dasharray="{{ (conf / 100 * 326.73) | round(1) }} 326.73"/>
+                </g>
+              </svg>
+            </span>
+            <strong class="score-value">{{ conf }}%</strong>
             <span>Model confidence</span>
           </div>
         </header>
@@ -165,7 +174,7 @@
         {% if entries %}
         <div class="chain-list">
           {% for entry in entries %}
-          <div class="chain-entry">
+          <div class="chain-entry reveal">
             <strong>{{ entry.network }}</strong>
             <span class="badge {{ 'badge-onchain' if entry.status == 'confirmed' else 'badge-local' }}">
               {{ entry.status }}

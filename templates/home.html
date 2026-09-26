@@ -7,7 +7,7 @@
   <div class="shell hero-inner">
     <div class="hero-copy">
       <span class="hero-eyebrow">{{ icon('shield', 13) }} AI + Blockchain News Verification</span>
-      <h1>Separate Facts from <em>Fiction</em>.</h1>
+      <h1><span class="hero-word">Separate</span> <span class="hero-word">Facts</span> <span class="hero-word">from</span> <em class="hero-word">Fiction</em>.</h1>
       <p class="hero-lead">
         Analyze news with Artificial Intelligence and verify its source through
         blockchain-based traceability — an intelligent digital newsroom where AI
@@ -39,9 +39,10 @@
       </div>
     </div>
 
-    <div class="hero-visual" aria-hidden="true">
+    <div class="hero-visual" data-parallax="0.05" aria-hidden="true">
       <div class="hv-scene">
         <div class="hv-paper">
+          <span class="hv-doc-scan"></span>
           <div class="hv-rule short"></div>
           <p class="hv-headline">Officials dispute the viral claim circulating online this week</p>
           <div class="hv-rule"></div>
@@ -51,7 +52,7 @@
           </div>
         </div>
 
-        <div class="hv-glass"><span class="hv-scan"></span></div>
+        <div class="hv-glass"><span class="hv-lens"></span><span class="hv-scan"></span></div>
 
         <span class="hv-chip hv-chip-real">{{ icon('check', 12) }} Real</span>
         <span class="hv-chip hv-chip-fake">{{ icon('x', 12) }} Fake</span>
@@ -62,7 +63,7 @@
         </div>
 
         <svg class="hv-nodes" viewBox="0 0 260 70" fill="none" aria-hidden="true">
-          <path d="M20 55 L130 18 L240 52 M130 18 L120 62" stroke="currentColor" stroke-width="1.4" opacity=".6"/>
+          <path pathLength="1" d="M20 55 L130 18 L240 52 M130 18 L120 62" stroke="currentColor" stroke-width="1.4" opacity=".6"/>
           <circle cx="20" cy="55" r="5" stroke="currentColor" stroke-width="1.8"/>
           <circle cx="130" cy="18" r="6" stroke="currentColor" stroke-width="1.8"/>
           <circle cx="240" cy="52" r="5" stroke="currentColor" stroke-width="1.8"/>
@@ -74,21 +75,21 @@
 
   <div class="shell">
     <div class="trust-strip">
-      <div class="trust-item">
+      <div class="trust-item reveal">
         {{ icon('spark', 22) }}
         <div>
           <h2>AI linguistic analysis</h2>
           <p>TF-IDF features and writing-style statistics trained on labelled news articles.</p>
         </div>
       </div>
-      <div class="trust-item">
+      <div class="trust-item reveal">
         {{ icon('hash', 22) }}
         <div>
           <h2>Tamper-evident ledger</h2>
           <p>Every verdict is chained to the previous record with a SHA-256 content hash.</p>
         </div>
       </div>
-      <div class="trust-item">
+      <div class="trust-item reveal">
         {{ icon('scale', 22) }}
         <div>
           <h2>Claim against evidence</h2>

@@ -250,7 +250,9 @@ def test_analyze_page_offers_the_staged_workspace(client):
     html = client.get("/analyze").data
     assert b'id="analyze-form"' in html
     assert b'id="scan-overlay"' in html
-    assert html.count(b"data-stage") == 5
+    # Seven stages: read, preprocess, analyse, compare, predict, check
+    # source, verify the blockchain/ledger record.
+    assert html.count(b"data-stage") == 7
 
 
 def test_verify_page_without_query_explains_itself(client):

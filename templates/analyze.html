@@ -57,13 +57,22 @@
     </form>
 
     <div class="scan-overlay" id="scan-overlay" role="status" aria-live="polite" aria-busy="false">
-      <p class="scan-title">{{ icon('spark', 14) }} Analysis in progress</p>
+      <p class="scan-title">
+        <span class="scan-badge" aria-hidden="true">
+          {{ icon('news', 17) }}
+          <span class="scan-badge-sweep"></span>
+          <span class="scan-badge-check">{{ icon('check', 11) }}</span>
+        </span>
+        <span>Analysis in progress</span>
+      </p>
       <ol class="scan-stages" id="scan-stages">
         <li class="scan-stage" data-stage><span class="stage-mark">1</span> Reading article</li>
-        <li class="scan-stage" data-stage><span class="stage-mark">2</span> Analyzing language</li>
-        <li class="scan-stage" data-stage><span class="stage-mark">3</span> Comparing patterns</li>
-        <li class="scan-stage" data-stage><span class="stage-mark">4</span> Generating prediction</li>
-        <li class="scan-stage" data-stage><span class="stage-mark">5</span> Checking source record</li>
+        <li class="scan-stage" data-stage><span class="stage-mark">2</span> Preprocessing text</li>
+        <li class="scan-stage" data-stage><span class="stage-mark">3</span> Analyzing language</li>
+        <li class="scan-stage" data-stage><span class="stage-mark">4</span> Comparing patterns</li>
+        <li class="scan-stage" data-stage><span class="stage-mark">5</span> Generating prediction</li>
+        <li class="scan-stage" data-stage><span class="stage-mark">6</span> Checking source record</li>
+        <li class="scan-stage" data-stage><span class="stage-mark">7</span> Verifying blockchain record</li>
       </ol>
       <div class="scan-progress"><i id="scan-progress-bar"></i></div>
     </div>

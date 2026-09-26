@@ -1,12 +1,15 @@
 /* TRUTHLINE — fact-check workspace.
    Character counter, sample loader and the staged analysis animation.
-   The animation always reflects a real /api/predict response; nothing is
-   simulated and no result is invented client-side. */
+
+   The sequence is presentation only: it runs while a real /api/predict
+   request is in flight and never resolves to a result the backend did
+   not return. If the request fails the overlay closes and the real
+   error is shown — no stage is ever marked complete on a failure. */
 (function () {
   "use strict";
 
   var MIN_CHARS = 40;
-  var STAGE_MS = 330;
+  var STAGE_MS = 240;
   var MAX_SOFT_LIMIT = 18000;
 
   var form = document.getElementById("analyze-form");
@@ -105,6 +108,8 @@
   /* ---------------------------------------------------------------- */
   /* Staged analysis                                                   */
   /* ---------------------------------------------------------------- */
+  var cancelled = false;
+
   function resetStages() {
     Array.prototype.forEach.call(stages, function (stage, index) {
       stage.classList.remove("is-active", "is-done");
@@ -118,6 +123,8 @@
       var index = 0;
 
       function step() {
+        if (cancelled) return;
+
         if (index > 0) {
           var previous = stages[index - 1];
           previous.classList.remove("is-active");
@@ -144,6 +151,7 @@
   }
 
   function finishWithError(message) {
+    cancelled = true;
     if (overlay) {
       overlay.classList.remove("is-active");
       overlay.setAttribute("aria-busy", "false");
@@ -154,6 +162,7 @@
   }
 
   function runAnalysis(text, title) {
+    cancelled = false;
     resetStages();
     clearError();
 
