@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Model · Fake News Detection{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>Model performance</h1>
+  <p class="lead">Hold-out evaluation on unseen articles.</p>
+</section>
+
+{% if metrics %}
+<div class="grid-4">
+  <div class="stat"><div class="stat-value">{{ (metrics.accuracy * 100) | round(2) }}%</div><div class="stat-label">Accuracy</div></div>
+  <div class="stat"><div class="stat-value">{{ (metrics.precision * 100) | round(2) }}%</div><div class="stat-label">Precision</div></div>
+  <div class="stat"><div class="stat-value">{{ (metrics.recall * 100) | round(2) }}%</div><div class="stat-label">Recall</div></div>
+  <div class="stat"><div class="stat-value">{{ (metrics.f1 * 100) | round(2) }}%</div><div class="stat-label">F1</div></div>
+</div>
+
+<section class="card">
+  <h3>Details</h3>
+  <table class="kv">
+    <tr><th>ROC-AUC</th><td>{{ '%.4f' % metrics.roc_auc }}</td></tr>
+    <tr><th>Test samples</th><td>{{ metrics.n_test }}</td></tr>
+    <tr><th>Algorithm</th><td>{{ metrics.model.algorithm if metrics.model else '—' }}</td></tr>
+    <tr><th>Features</th><td>{{ '{:,}'.format(metrics.model.n_features) if metrics.model else '—' }}</td></tr>
+    <tr><th>Trained</th><td>{{ metrics.model.trained_at if metrics.model else '—' }}</td></tr>
+    <tr><th>Training rows</th><td>{{ metrics.dataset.total if metrics.dataset else '—' }} ({{ metrics.dataset.train if metrics.dataset else '?' }} train / {{ metrics.dataset.test if metrics.dataset else '?' }} test)</td></tr>
+  </table>
+</section>
+
+<section class="card">
+  <h3>Classification report</h3>
+  <pre class="code">{{ metrics.report if metrics.report else '—' }}</pre>
+</section>
+
+{% if metrics.confusion_matrix %}
+<section class="card">
+  <h3>Confusion matrix</h3>
+  {% set cm = metrics.confusion_matrix %}
+  <table class="data cm">
+    <thead><tr><th></th><th>pred FAKE</th><th>pred REAL</th></tr></thead>
+    <tbody>
+      <tr><th>actual FAKE</th><td>{{ cm[0][0] }}</td><td>{{ cm[0][1] }}</td></tr>
+      <tr><th>actual REAL</th><td>{{ cm[1][0] }}</td><td>{{ cm[1][1] }}</td></tr>
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+{% else %}
+<section class="card">
+  <p class="empty">No metrics found. Run <code>python scripts/train.py</code> to train the model.</p>
+</section>
+{% endif %}
+
+{% if model %}
+<section class="card">
+  <h3>Runtime info</h3>
+  <pre class="code">{{ model.summary() | tojson(indent=2) }}</pre>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Check news · Fake News Detection{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>Is this news <span class="accent">real</span> or <span class="danger">fake</span>?</h1>
+  <p class="lead">
+    Paste a news article below. The classifier scores its wording and writing style,
+    then anchors the result on an append-only traceability ledger so the verdict
+    can never be quietly altered.
+  </p>
+</section>
+
+<div class="grid-2">
+  <section class="card">
+    <form method="post" action="{{ url_for('predict') }}" id="check-form">
+      <label class="field">
+        <span class="label">Headline <span class="muted">(optional)</span></label>
+        <input type="text" name="title" maxlength="300" placeholder="e.g. Government announces new policy">
+      </label>
+
+      <label class="field">
+        <span class="label">Article text</span>
+        <textarea name="text" id="article-text" rows="12" required
+                  placeholder="Paste the full news article here (minimum 40 characters)…"></textarea>
+        <span class="hint"><span id="char-count">0</span> characters</span>
+      </label>
+
+      <div class="actions">
+        <button type="submit" class="btn btn-primary" id="submit-btn">Analyse article</button>
+        <button type="button" class="btn btn-ghost" id="sample-btn">Try a sample</button>
+      </div>
+    </form>
+  </section>
+
+  <aside class="side">
+    <section class="card status-card">
+      <h3>System status</h3>
+      <ul class="status-list">
+        <li>
+          <span class="dot {{ 'dot-ok' if model_ready else 'dot-bad' }}"></span>
+          <span>Classifier
+            {% if model_ready %}<strong>loaded</strong>{% else %}<strong class="danger">not trained</strong>{% endif %}
+          </span>
+        </li>
+        <li>
+          <span class="dot dot-ok"></span>
+          <span>Local hash-chain ledger <strong>active</strong></span>
+        </li>
+        <li>
+          <span class="dot {{ 'dot-ok' if chain.blockchain.connected else 'dot-warn' }}"></span>
+          <span>Ethereum anchor
+            {% if chain.blockchain.connected %}
+              <strong>connected</strong> (chain {{ chain.blockchain.chain_id }})
+            {% else %}
+              <strong class="muted">offline</strong> — local chain only
+            {% endif %}
+          </span>
+        </li>
+      </ul>
+      {% if not model_ready %}
+        <p class="notice notice-error">
+          {{ model_error or "Train the model first:" }}
+          <code>python scripts/train.py</code>
+        </p>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <h3>How it works</h3>
+      <ol class="steps">
+        <li><strong>Preprocess</strong> — strip URLs, HTML, noise; normalise text.</li>
+        <li><strong>Vectorise</strong> — TF-IDF over unigrams &amp; bigrams plus style statistics (caps, exclamation, clickbait terms).</li>
+        <li><strong>Classify</strong> — Logistic Regression returns FAKE / REAL with a confidence score.</li>
+        <li><strong>Trace</strong> — SHA-256 of the article is chained locally and anchored on chain when available.</li>
+      </ol>
+    </section>
+  </aside>
+</div>
+{% endblock %}

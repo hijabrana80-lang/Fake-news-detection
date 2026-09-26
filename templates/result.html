@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Result · Fake News Detection{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">Classification result</p>
+  <h1>
+    This article is
+    <span class="{{ 'danger' if prediction.predicted_label == 'FAKE' else 'accent' }}">
+      {{ prediction.predicted_label }}
+    </span>
+  </h1>
+</section>
+
+<div class="grid-2">
+  <section class="card">
+    <div class="score {{ 'score-fake' if prediction.predicted_label == 'FAKE' else 'score-real' }}">
+      <div class="score-value">{{ (prediction.confidence * 100) | round(1) }}%</div>
+      <div class="score-label">confidence</div>
+      <div class="bar">
+        <div class="bar-fill" style="width: {{ (prediction.confidence * 100) | round(1) }}%"></div>
+      </div>
+    </div>
+
+    <h3 class="mt">Probability breakdown</h3>
+    <div class="prob-row">
+      <span class="prob-name danger">FAKE</span>
+      <div class="prob-track"><div class="prob-fill prob-fake" style="width: {{ (prediction.prob_fake * 100) | round(1) }}%"></div></div>
+      <span class="prob-num">{{ (prediction.prob_fake * 100) | round(1) }}%</span>
+    </div>
+    <div class="prob-row">
+      <span class="prob-name accent">REAL</span>
+      <div class="prob-track"><div class="prob-fill prob-real" style="width: {{ (prediction.prob_real * 100) | round(1) }}%"></div></div>
+      <span class="prob-num">{{ (prediction.prob_real * 100) | round(1) }}%</span>
+    </div>
+
+    <h3 class="mt">Submission</h3>
+    <table class="kv">
+      <tr><th>ID</th><td>#{{ prediction.id }}</td></tr>
+      {% if prediction.title %}<tr><th>Headline</th><td>{{ prediction.title }}</td></tr>{% endif %}
+      <tr><th>Received</th><td>{{ prediction.created_at.strftime('%Y-%m-%d %H:%M:%S UTC') if prediction.created_at else '—' }}</td></tr>
+      <tr><th>Source</th><td>{{ prediction.source | upper }}</td></tr>
+      <tr><th>Model</th><td>{{ prediction.model_version or '—' }}</td></tr>
+    </table>
+  </section>
+
+  <aside class="side">
+    <section class="card">
+      <h3>Traceability record</h3>
+      <table class="kv">
+        <tr><th>Content hash</th><td class="hash">{{ prediction.content_hash }}</td></tr>
+        {% for entry in entries %}
+          <tr><th>Ledger network</th><td>{{ entry.network }}</td></tr>
+          <tr><th>Entry hash</th><td class="hash">{{ entry.entry_hash }}</td></tr>
+          {% if entry.tx_hash %}<tr><th>Tx hash</th><td class="hash">{{ entry.tx_hash }}</td></tr>{% endif %}
+          {% if entry.block_number %}<tr><th>Block</th><td>#{{ entry.block_number }}</td></tr>{% endif %}
+        {% endfor %}
+      </table>
+      <div class="actions">
+        <a class="btn btn-ghost" href="{{ url_for('trace', prediction_id=prediction.id) }}">View full trace</a>
+        <a class="btn btn-ghost" href="{{ url_for('history') }}">History</a>
+        <a class="btn btn-primary" href="{{ url_for('home') }}">Check another</a>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Article</h3>
+      <p class="article-preview">{{ prediction.text[:900] }}{% if prediction.text | length > 900 %}…{% endif %}</p>
+    </section>
+  </aside>
+</div>
+{% endblock %}

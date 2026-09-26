@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Trace #{{ prediction.id }} · Fake News Detection{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">Source traceability</p>
+  <h1>Record #{{ prediction.id }}</h1>
+  <p class="lead">
+    Verdict <strong class="{{ 'danger' if prediction.predicted_label == 'FAKE' else 'accent' }}">{{ prediction.predicted_label }}</strong>
+    at {{ (prediction.confidence * 100) | round(1) }}% confidence.
+  </p>
+</section>
+
+<div class="flash flash-{{ 'success' if verified else 'error' }}">
+  {% if verified %}
+    ✓ Full ledger verified — this record's {{ entries | length }} entr{{ 'y' if entries | length == 1 else 'ies' }} and all {{ total_entries }} ledger entries in the chain are intact.
+  {% else %}
+    ✕ Hash chain verification FAILED — an entry was modified or removed.
+  {% endif %}
+</div>
+
+{% if not entries_ok %}
+<div class="flash flash-error">✕ This record's own ledger entries failed verification.</div>
+{% endif %}
+
+<section class="card">
+  <h3>Content fingerprint</h3>
+  <table class="kv">
+    <tr><th>SHA-256</th><td class="hash">{{ prediction.content_hash }}</td></tr>
+    <tr><th>Stored text matches hash</th>
+        <td>{{ '✓ verified' if hash_ok else '✗ MISMATCH — stored text was altered' }}</td></tr>
+    <tr><th>Model version</th><td>{{ prediction.model_version or '—' }}</td></tr>
+    <tr><th>Origin</th><td>{{ prediction.source | upper }}</td></tr>
+  </table>
+</section>
+
+<section class="card">
+  <h3>Ledger entries ({{ entries | length }})</h3>
+  {% if entries %}
+  <ol class="chain">
+    {% for e in entries %}
+    <li class="chain-item">
+      <div class="chain-index">{{ loop.index }}</div>
+      <div class="chain-body">
+        <div class="chain-row"><span class="muted">network</span><strong>{{ e.network }}</strong></div>
+        <div class="chain-row"><span class="muted">prev</span><code>{{ e.prev_hash }}</code></div>
+        <div class="chain-row"><span class="muted">entry</span><code>{{ e.entry_hash }}</code></div>
+        {% if e.tx_hash %}
+          <div class="chain-row"><span class="muted">tx</span><code>{{ e.tx_hash }}</code></div>
+          <div class="chain-row"><span class="muted">block</span><code>#{{ e.block_number }}</code></div>
+        {% endif %}
+        <div class="chain-row"><span class="muted">status</span>
+          <span class="badge {{ 'badge-chain' if e.status == 'confirmed' else 'badge-real' }}">{{ e.status }}</span>
+          <span class="muted">{{ e.created_at.strftime('%Y-%m-%d %H:%M:%S') if e.created_at else '' }}</span>
+        </div>
+      </div>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+    <p class="empty">No ledger entries recorded for this item.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h3>Chain status</h3>
+  <pre class="code">{{ chain | tojson(indent=2) }}</pre>
+  <div class="actions">
+    <a class="btn btn-ghost" href="{{ url_for('api_ledger_verify', prediction_id=prediction.id) }}">Verify JSON</a>
+    <a class="btn btn-ghost" href="{{ url_for('history') }}">Back to history</a>
+    <a class="btn btn-primary" href="{{ url_for('home') }}">Check another</a>
+  </div>
+</section>
+{% endblock %}

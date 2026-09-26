@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} · Fake News Detection{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>{{ code }}</h1>
+  <p class="lead">{{ message }}</p>
+  <div class="actions">
+    <a class="btn btn-primary" href="{{ url_for('home') }}">Back to home</a>
+  </div>
+</section>
+{% endblock %}
