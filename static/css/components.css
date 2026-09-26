@@ -162,7 +162,7 @@
 }
 .btn-outline-light:hover { background: rgba(255, 255, 255, .14); border-color: #fff; }
 
-.btn-sm { padding: .55rem 1.05rem; font-size: .82rem; }
+.btn-sm { padding: .55rem 1.05rem; font-size: .82rem; min-height: 44px; }
 .btn-lg { padding: .95rem 2rem; font-size: .98rem; }
 .btn-block { width: 100%; }
 
@@ -368,7 +368,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: .35rem 1rem;
   margin-top: .45rem;
   font-size: .78rem;
   color: var(--muted);
@@ -431,7 +432,7 @@
 .cell-headline { max-width: 220px; white-space: normal; overflow-wrap: anywhere; }
 .cell-links { white-space: nowrap; }
 .cell-links a + a { margin-left: .7rem; }
-.cell-mono { font-family: var(--mono); font-size: .78rem; color: var(--muted); }
+.cell-mono { font-family: var(--mono); font-size: .78rem; color: var(--muted); overflow-wrap: anywhere; }
 .cell-time { white-space: nowrap; color: var(--muted); font-size: .84rem; }
 
 .empty-state {
@@ -471,7 +472,7 @@
 
 .colophon-inner {
   display: grid;
-  grid-template-columns: 1.6fr repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
   gap: 2rem;
   padding: 3rem 0 2.25rem;
 }
@@ -554,7 +555,9 @@
   .cell-hide-md { display: none; }
 }
 
-@media (max-width: 880px) {
+/* Tablet (768–1023) and below use the hamburger menu; the full navigation
+   is only shown from 1024px upward, where it has room to breathe. */
+@media (max-width: 1023px) {
   .nav-toggle { display: flex; }
 
   .nav {
@@ -588,4 +591,17 @@
   .colophon-base { flex-direction: column; gap: .4rem; }
   .brand-text small { display: none; }
   .actions .btn { flex: 1 1 auto; }
+}
+
+/* Smallest phones: shed one more column of table metadata so the table
+   fits the card instead of needing an inner swipe. */
+@media (max-width: 430px) {
+  .data-table { font-size: .8rem; }
+  .data-table th,
+  .data-table td { padding: .55rem .38rem; }
+  .data-table .badge { white-space: normal; text-align: center; }
+  .cell-links { white-space: normal; }
+  .cell-links a { display: block; }
+  .cell-links a + a { margin-left: 0; }
+  .brand-text strong { font-size: 1.12rem; }
 }

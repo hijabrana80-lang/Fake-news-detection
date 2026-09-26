@@ -71,6 +71,7 @@ body {
 }
 
 img, svg { max-width: 100%; }
+img { height: auto; }
 svg { display: block; }
 
 h1, h2, h3, h4 {

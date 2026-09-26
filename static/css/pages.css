@@ -17,7 +17,7 @@
 
 .hero-inner {
   display: grid;
-  grid-template-columns: 1.05fr .95fr;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
   gap: clamp(2rem, 5vw, 4rem);
   align-items: center;
   padding: clamp(3rem, 7vw, 5.5rem) 0;
@@ -284,7 +284,7 @@
 
 .workspace {
   display: grid;
-  grid-template-columns: 1.3fr .9fr;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, .9fr);
   gap: 1.5rem;
   align-items: start;
   padding: clamp(1.75rem, 4vw, 3rem) 0;
@@ -359,7 +359,7 @@
 /* --- justice / balance --- */
 .balance {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 1rem;
   padding: 1rem;
@@ -447,7 +447,7 @@
 /* ------------------------------------------------------------------ */
 /* Fact check report (result)                                         */
 /* ------------------------------------------------------------------ */
-.report { display: grid; grid-template-columns: 1.25fr .95fr; gap: 1.5rem; align-items: start; }
+.report { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, .95fr); gap: 1.5rem; align-items: start; }
 
 .verdict-card {
   border: 1px solid;
@@ -501,7 +501,7 @@
 
 .prob-row {
   display: grid;
-  grid-template-columns: 4.5rem 1fr 3.6rem;
+  grid-template-columns: 4.5rem minmax(0, 1fr) 3.6rem;
   align-items: center;
   gap: .7rem;
   margin-bottom: .6rem;
@@ -516,7 +516,7 @@
 
 .kv-list { width: 100%; font-size: .9rem; }
 .kv-list th,
-.kv-list td { padding: .6rem 0; border-bottom: 1px dotted var(--line); text-align: left; vertical-align: top; }
+.kv-list td { padding: .6rem 0; border-bottom: 1px dotted var(--line); text-align: left; vertical-align: top; overflow-wrap: anywhere; }
 .kv-list th { font-weight: 500; color: var(--muted); width: 42%; }
 .kv-list tr:last-child th, .kv-list tr:last-child td { border-bottom: 0; }
 .hash-text { font-family: var(--mono); font-size: .76rem; word-break: break-all; color: var(--charcoal); }
@@ -526,7 +526,7 @@
 
 .chain-node {
   display: grid;
-  grid-template-columns: 40px 1fr;
+  grid-template-columns: 40px minmax(0, 1fr);
   gap: .95rem;
   position: relative;
   padding-bottom: 1.35rem;
@@ -679,7 +679,7 @@
 }
 
 .donut-wrap { display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap; }
-.donut { width: 132px; height: 132px; flex: none; }
+.donut { width: 132px; max-width: 100%; height: auto; flex: none; }
 .donut circle { fill: none; stroke-width: 18; }
 .donut-track { stroke: var(--paper-2); }
 .donut-real { stroke: var(--green); stroke-linecap: butt; transition: stroke-dasharray .8s var(--ease); }
@@ -691,7 +691,7 @@
 .legend-fake { background: var(--burgundy); }
 
 .bar-chart { display: flex; flex-direction: column; gap: .85rem; }
-.bar-row { display: grid; grid-template-columns: 6.5rem 1fr 3rem; gap: .7rem; align-items: center; font-size: .84rem; }
+.bar-row { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr) 3rem; gap: .7rem; align-items: center; font-size: .84rem; }
 .bar-track { height: 22px; background: var(--paper-2); border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
 .bar-fill { display: block; height: 100%; width: var(--w, 0%); transition: width .8s var(--ease); }
 .bar-local { background: repeating-linear-gradient(45deg, var(--navy-2) 0 7px, #35507f 7px 14px); }
@@ -707,7 +707,10 @@
   border-radius: var(--radius);
   background: var(--paper-2);
   font-size: .87rem;
+  min-width: 0;
 }
+.chain-status > * { min-width: 0; }
+.chain-status code { overflow-wrap: anywhere; }
 
 /* ------------------------------------------------------------------ */
 /* How it works                                                       */
@@ -818,7 +821,7 @@
   padding: 1rem 1.1rem;
   background: var(--card);
 }
-.chain-entry dl { display: grid; grid-template-columns: 8rem 1fr; gap: .35rem .9rem; margin: .6rem 0 0; font-size: .83rem; }
+.chain-entry dl { display: grid; grid-template-columns: minmax(0, 8rem) minmax(0, 1fr); gap: .35rem .9rem; margin: .6rem 0 0; font-size: .83rem; }
 .chain-entry dt { color: var(--muted); }
 .chain-entry dd { margin: 0; word-break: break-all; font-family: var(--mono); font-size: .76rem; }
 
@@ -856,6 +859,13 @@
   .trust-item:last-child { border-bottom: 0; padding-bottom: 0; }
 }
 
+@media (max-width: 767px) {
+  /* Phones lead with the masthead copy so the headline, lead and primary
+     actions all land above the fold; the illustration follows underneath.
+     Tablets keep the artwork first, where there is vertical room for it. */
+  .hero-visual { order: 0; }
+}
+
 @media (max-width: 760px) {
   .pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .chart-grid { grid-template-columns: minmax(0, 1fr); }
@@ -876,4 +886,9 @@
   .data-table th,
   .data-table td { padding: .6rem .45rem; }
   .cell-links a + a { margin-left: .45rem; }
+
+  /* On small phones the illustration fills the whole column, which pushes
+     the floating chips, the shield badge and the magnifier handle past the
+     viewport. Scale the scene down so every piece stays inside the frame. */
+  .hv-scene { width: min(430px, 83vw); }
 }
