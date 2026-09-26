@@ -1,0 +1,13 @@
+# Normalise line endings so the repo stays LF no matter who clones it.
+* text=auto eol=lf
+
+*.py text diff=py
+*.js text
+*.json text
+*.md text
+*.sol text
+
+*.png binary
+*.jpg binary
+*.joblib binary
+*.pkl binary
