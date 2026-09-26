@@ -1,0 +1,33 @@
+# Environments
+venv/
+.env
+
+# Python caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Build / editor
+build/
+dist/
+*.log
+.DS_Store
+.vscode/
+.idea/
+
+# Project artifacts
+models/*.pkl
+models/*.joblib
+models/metrics.json
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Local blockchain / database files
+instance/
+*.db

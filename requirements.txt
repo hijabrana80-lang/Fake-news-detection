@@ -1,0 +1,11 @@
+Flask
+Flask-SQLAlchemy
+python-dotenv
+pandas
+numpy
+scikit-learn
+scipy
+nltk
+joblib
+web3
+pytest
