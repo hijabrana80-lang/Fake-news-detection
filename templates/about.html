@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, section_heading %}
+{% block title %}About · TRUTHLINE{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div class="shell">
+    <span class="kicker">About the Project</span>
+    <h1>AI-Powered Fake News Detection and Source Traceability Using Blockchain</h1>
+    <p>TRUTHLINE is the working interface of that project: a digital fact-checking desk where
+       a machine-learning model reads a story and a tamper-evident ledger preserves the record
+       of every verdict it produces.</p>
+  </div>
+</div>
+
+<section class="section-tight">
+  <div class="shell">
+    <div class="grid grid-2">
+      <section>
+        {{ section_heading("Purpose", kicker="Why this exists") }}
+        <p>Misinformation spreads faster than it can be corrected, and most corrections carry
+           no evidence that they were checked at all. This project combines two complementary
+           mechanisms:</p>
+        <ul class="side-list">
+          <li>{{ icon('spark', 16) }}<span><strong>A detection model</strong> that classifies
+              submitted text as FAKE or REAL using linguistic patterns learned from labelled
+              news articles.</span></li>
+          <li>{{ icon('chain', 16) }}<span><strong>A traceability ledger</strong> that records
+              each verdict as a SHA-256 fingerprint in a hash chain, optionally anchored to an
+              Ethereum-compatible network.</span></li>
+          <li>{{ icon('search', 16) }}<span><strong>A verification desk</strong> that lets any
+              visitor re-check a stored record and confirm that nothing has been altered.</span></li>
+        </ul>
+
+        <p class="notice-bar notice-info">
+          {{ icon('shield', 16) }}
+          <span>The system reports <em>model confidence</em> and <em>record integrity</em>.
+          It never claims that a story is objectively true or false.</span>
+        </p>
+      </section>
+
+      <section>
+        {{ section_heading("Project information", kicker="Credits") }}
+        <dl class="credits">
+          <div>
+            <dt>Project type</dt>
+            <dd>Final Year Project</dd>
+            <dt>Degree programme</dt>
+            <dd>BS Software Engineering</dd>
+          </div>
+          <div>
+            <dt>Project title</dt>
+            <dd>AI-Powered Fake News Detection and Source Traceability Using Blockchain</dd>
+            <dt>Interface</dt>
+            <dd>TRUTHLINE — News Verification &amp; Traceability</dd>
+          </div>
+          <div>
+            <dt>Problem domain</dt>
+            <dd>Misinformation detection and source accountability</dd>
+            <dt>Methods</dt>
+            <dd>Natural language processing, supervised classification, hash-chained ledger</dd>
+          </div>
+          <div>
+            <dt>Evaluation</dt>
+            <dd>Hold-out test set with precision, recall, F1 and ROC-AUC</dd>
+            <dt>Testing</dt>
+            <dd>Automated pytest suite covering model, ledger and web layers</dd>
+          </div>
+        </dl>
+      </section>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="shell">
+    {{ section_heading("Technologies used", kicker="Stack") }}
+    <ul class="tech-chips">
+      <li>Python 3</li>
+      <li>Flask</li>
+      <li>scikit-learn</li>
+      <li>NLTK</li>
+      <li>TF-IDF Vectorization</li>
+      <li>Logistic Regression</li>
+      <li>SQLAlchemy</li>
+      <li>SQLite</li>
+      <li>SHA-256</li>
+      <li>Web3 / Ethereum</li>
+      <li>Solidity</li>
+      <li>HTML5</li>
+      <li>CSS3</li>
+      <li>Vanilla JavaScript</li>
+      <li>pytest</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    {{ section_heading("Honest limitations", kicker="Read before citing") }}
+    <div class="grid grid-3">
+      <div class="card">
+        <p class="card-title">Dataset</p>
+        <p class="muted">Trained on 1,991 curated articles from the ISOT Fake/True corpus.
+           That is a small dataset relative to production fact-checking systems.</p>
+      </div>
+      <div class="card">
+        <p class="card-title">Optimistic accuracy</p>
+        <p class="muted">Reported hold-out accuracy is high partly because Reuters articles in
+           the corpus carry a <code>(Reuters)</code> marker. Results on out-of-domain text will
+           be lower.</p>
+      </div>
+      <div class="card">
+        <p class="card-title">Prediction, not proof</p>
+        <p class="muted">The classifier estimates how similar text is to its training examples.
+           It cannot verify facts, sources or intent.</p>
+      </div>
+    </div>
+
+    <div class="actions mt-lg">
+      <a class="btn btn-primary" href="{{ url_for('analyze') }}">Analyze a story</a>
+      <a class="btn btn-outline" href="{{ url_for('how_it_works') }}">Read how it works</a>
+      <a class="btn btn-ghost" href="{{ url_for('metrics') }}">Model metrics</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

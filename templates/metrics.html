@@ -1,61 +1,113 @@
 {% extends "base.html" %}
-{% block title %}Model · Fake News Detection{% endblock %}
+{% from "_macros.html" import icon, section_heading %}
+{% block title %}Model Metrics · TRUTHLINE{% endblock %}
 
 {% block content %}
-<section class="hero">
-  <h1>Model performance</h1>
-  <p class="lead">Hold-out evaluation on unseen articles.</p>
-</section>
-
-{% if metrics %}
-<div class="grid-4">
-  <div class="stat"><div class="stat-value">{{ (metrics.accuracy * 100) | round(2) }}%</div><div class="stat-label">Accuracy</div></div>
-  <div class="stat"><div class="stat-value">{{ (metrics.precision * 100) | round(2) }}%</div><div class="stat-label">Precision</div></div>
-  <div class="stat"><div class="stat-value">{{ (metrics.recall * 100) | round(2) }}%</div><div class="stat-label">Recall</div></div>
-  <div class="stat"><div class="stat-value">{{ (metrics.f1 * 100) | round(2) }}%</div><div class="stat-label">F1</div></div>
+<div class="page-head">
+  <div class="shell">
+    <span class="kicker">Model Evaluation</span>
+    <h1>Hold-out performance</h1>
+    <p>Metrics produced by <code>scripts/train.py</code> on articles the model never saw during
+       training. Read them alongside the limitations below — they are optimistic.</p>
+  </div>
 </div>
 
-<section class="card">
-  <h3>Details</h3>
-  <table class="kv">
-    <tr><th>ROC-AUC</th><td>{{ '%.4f' % metrics.roc_auc }}</td></tr>
-    <tr><th>Test samples</th><td>{{ metrics.n_test }}</td></tr>
-    <tr><th>Algorithm</th><td>{{ metrics.model.algorithm if metrics.model else '—' }}</td></tr>
-    <tr><th>Features</th><td>{{ '{:,}'.format(metrics.model.n_features) if metrics.model else '—' }}</td></tr>
-    <tr><th>Trained</th><td>{{ metrics.model.trained_at if metrics.model else '—' }}</td></tr>
-    <tr><th>Training rows</th><td>{{ metrics.dataset.total if metrics.dataset else '—' }} ({{ metrics.dataset.train if metrics.dataset else '?' }} train / {{ metrics.dataset.test if metrics.dataset else '?' }} test)</td></tr>
-  </table>
+{% if metrics %}
+<section class="section-tight">
+  <div class="shell">
+    <div class="score-grid">
+      <div class="stat-card reveal">
+        <span class="stat-label">Accuracy</span>
+        <strong class="stat-value">{{ (metrics.accuracy * 100) | round(2) }}%</strong>
+        <span class="stat-note">Correct labels on the test split</span>
+      </div>
+      <div class="stat-card reveal">
+        <span class="stat-label">Precision</span>
+        <strong class="stat-value">{{ (metrics.precision * 100) | round(2) }}%</strong>
+        <span class="stat-note">Of predicted positives, how many were positive</span>
+      </div>
+      <div class="stat-card reveal">
+        <span class="stat-label">Recall</span>
+        <strong class="stat-value">{{ (metrics.recall * 100) | round(2) }}%</strong>
+        <span class="stat-note">Of actual positives, how many were found</span>
+      </div>
+      <div class="stat-card stat-gold reveal">
+        <span class="stat-label">F1 score</span>
+        <strong class="stat-value">{{ (metrics.f1 * 100) | round(2) }}%</strong>
+        <span class="stat-note">Harmonic mean of precision and recall</span>
+      </div>
+    </div>
+
+    <p class="notice-bar notice-warn">
+      {{ icon('scale', 16) }}
+      <span><strong>Interpret with care.</strong> The ISOT corpus is small and Reuters items
+      carry a <code>(Reuters)</code> marker, so the model can partly key on surface signals.
+      Expect lower accuracy on out-of-domain news.</span>
+    </p>
+  </div>
 </section>
 
-<section class="card">
-  <h3>Classification report</h3>
-  <pre class="code">{{ metrics.report if metrics.report else '—' }}</pre>
-</section>
+<section class="section-tight">
+  <div class="shell report">
+    <div>
+      <section class="card">
+        <div class="card-head"><h2>Evaluation details</h2></div>
+        <table class="kv-list">
+          <tr><th>ROC-AUC</th><td>{{ '%.4f' % metrics.roc_auc }}</td></tr>
+          <tr><th>Test samples</th><td>{{ metrics.n_test }}</td></tr>
+          <tr><th>Algorithm</th><td>{{ metrics.model.algorithm if metrics.model else '—' }}</td></tr>
+          <tr><th>Features</th><td>{{ '{:,}'.format(metrics.model.n_features) if metrics.model else '—' }}</td></tr>
+          <tr><th>Trained</th><td>{{ metrics.model.trained_at if metrics.model else '—' }}</td></tr>
+          <tr><th>Training rows</th>
+              <td>{{ metrics.dataset.total if metrics.dataset else '—' }}
+                  ({{ metrics.dataset.train if metrics.dataset else '?' }} train /
+                   {{ metrics.dataset.test if metrics.dataset else '?' }} test)</td></tr>
+        </table>
+      </section>
 
-{% if metrics.confusion_matrix %}
-<section class="card">
-  <h3>Confusion matrix</h3>
-  {% set cm = metrics.confusion_matrix %}
-  <table class="data cm">
-    <thead><tr><th></th><th>pred FAKE</th><th>pred REAL</th></tr></thead>
-    <tbody>
-      <tr><th>actual FAKE</th><td>{{ cm[0][0] }}</td><td>{{ cm[0][1] }}</td></tr>
-      <tr><th>actual REAL</th><td>{{ cm[1][0] }}</td><td>{{ cm[1][1] }}</td></tr>
-    </tbody>
-  </table>
+      {% if metrics.confusion_matrix %}
+      <section class="card mt-lg">
+        <div class="card-head"><h2>Confusion matrix</h2></div>
+        {% set cm = metrics.confusion_matrix %}
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th></th><th>Predicted FAKE</th><th>Predicted REAL</th></tr></thead>
+            <tbody>
+              <tr><th>Actual FAKE</th><td>{{ cm[0][0] }}</td><td>{{ cm[0][1] }}</td></tr>
+              <tr><th>Actual REAL</th><td>{{ cm[1][0] }}</td><td>{{ cm[1][1] }}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      {% endif %}
+    </div>
+
+    <aside>
+      <section class="card">
+        <div class="card-head"><h2>Classification report</h2></div>
+        <pre class="code-block">{{ metrics.report if metrics.report else '—' }}</pre>
+      </section>
+
+      {% if model %}
+      <section class="card mt-lg">
+        <div class="card-head"><h2>Runtime info</h2></div>
+        <pre class="code-block">{{ model.summary() | tojson(indent=2) }}</pre>
+      </section>
+      {% endif %}
+    </aside>
+  </div>
 </section>
-{% endif %}
 
 {% else %}
-<section class="card">
-  <p class="empty">No metrics found. Run <code>python scripts/train.py</code> to train the model.</p>
-</section>
-{% endif %}
-
-{% if model %}
-<section class="card">
-  <h3>Runtime info</h3>
-  <pre class="code">{{ model.summary() | tojson(indent=2) }}</pre>
+<section class="section-tight">
+  <div class="shell">
+    <div class="card empty-state">
+      {{ icon('spark', 28) }}
+      <p>No metrics found. Train the model to generate a hold-out evaluation.</p>
+      <pre class="code-block">python scripts/train.py</pre>
+      <a class="btn btn-accent mt-lg" href="{{ url_for('analyze') }}">Back to the workspace</a>
+    </div>
+  </div>
 </section>
 {% endif %}
 {% endblock %}

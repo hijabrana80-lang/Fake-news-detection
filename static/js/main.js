@@ -1,40 +1,66 @@
-/* Progressive enhancement for the detection form. */
+/* TRUTHLINE — global progressive enhancement.
+   Navigation, scroll reveals and keyboard shortcuts. Page specific logic
+   lives in its own file (see analyze.js). */
 (function () {
   "use strict";
 
-  var textarea = document.getElementById("article-text");
-  var counter = document.getElementById("char-count");
-  var form = document.getElementById("check-form");
-  var button = document.getElementById("submit-btn");
-  var sampleBtn = document.getElementById("sample-btn");
+  /* ---------------------------------------------------------------- */
+  /* Mobile navigation                                                  */
+  /* ---------------------------------------------------------------- */
+  var toggle = document.querySelector(".nav-toggle");
+  var nav = document.getElementById("primary-nav");
 
-  var SAMPLES = [
-    "BREAKING!!! You WON'T BELIEVE what this celebrity did next!! Doctors HATE this one weird trick that cures diabetes instantly. Share before this is BANNED by the mainstream media — the truth they don't want you to know. Thousands of insiders have confirmed the conspiracy in a secret report that was censored overnight.",
-    "WASHINGTON (Reuters) - The Senate on Tuesday passed a bipartisan infrastructure bill by a vote of 69-30, sending the legislation to the House for consideration. The package allocates $550 billion in new federal spending over five years for roads, bridges, passenger rail and broadband expansion, according to the Congressional Budget Office."
-  ];
-  var sampleIndex = 0;
-
-  if (textarea && counter) {
-    var update = function () {
-      counter.textContent = textarea.value.length.toLocaleString();
-    };
-    textarea.addEventListener("input", update);
-    update();
+  function setNav(open) {
+    if (!toggle || !nav) return;
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
+    nav.classList.toggle("is-open", open);
   }
 
-  if (sampleBtn && textarea) {
-    sampleBtn.addEventListener("click", function () {
-      textarea.value = SAMPLES[sampleIndex % SAMPLES.length];
-      sampleIndex += 1;
-      textarea.dispatchEvent(new Event("input"));
-      textarea.focus();
+  if (toggle && nav) {
+    toggle.addEventListener("click", function () {
+      setNav(toggle.getAttribute("aria-expanded") !== "true");
+    });
+
+    nav.addEventListener("click", function (event) {
+      if (event.target.closest("a")) setNav(false);
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") setNav(false);
+    });
+
+    window.addEventListener("resize", function () {
+      if (window.innerWidth > 880) setNav(false);
     });
   }
 
-  if (form && button) {
-    form.addEventListener("submit", function () {
-      button.disabled = true;
-      button.textContent = "Analysing…";
+  /* ---------------------------------------------------------------- */
+  /* Reveal sections as they enter the viewport                        */
+  /* ---------------------------------------------------------------- */
+  var revealables = document.querySelectorAll(".reveal");
+
+  if (!revealables.length) return;
+
+  if (!("IntersectionObserver" in window)) {
+    Array.prototype.forEach.call(revealables, function (el) {
+      el.classList.add("is-visible");
     });
+    return;
   }
+
+  var observer = new IntersectionObserver(
+    function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    },
+    { rootMargin: "0px 0px -8% 0px", threshold: 0.08 }
+  );
+
+  Array.prototype.forEach.call(revealables, function (el) {
+    observer.observe(el);
+  });
 })();

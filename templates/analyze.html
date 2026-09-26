@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon %}
+{% block title %}Analyze News · TRUTHLINE{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div class="shell">
+    <span class="kicker">Fact Check Workspace</span>
+    <h1>Analyze a News Story</h1>
+    <p>Submit a headline or article and let our AI analyze its linguistic patterns.</p>
+  </div>
+</div>
+
+<div class="shell workspace">
+  <section class="card workspace-panel" aria-labelledby="workspace-title">
+    <h2 id="workspace-title" class="sr-only">News input</h2>
+
+    <form method="post" action="{{ url_for('predict') }}" id="analyze-form" novalidate>
+      <div class="field">
+        <span class="field-label">
+          <label for="headline">Headline</label>
+          <span class="hint">Optional</span>
+        </span>
+        <input class="input" type="text" id="headline" name="title" maxlength="300"
+               placeholder="e.g. Officials dispute viral claim about the new policy"
+               autocomplete="off">
+      </div>
+
+      <div class="field">
+        <span class="field-label">
+          <label for="article-text">Article text</label>
+          <span class="hint">AI-Powered Text Analysis</span>
+        </span>
+
+        <div class="editor-shell">
+          <div class="editor-bar">
+            <span class="dot-set" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span>Source document</span>
+          </div>
+          <textarea class="textarea" id="article-text" name="text" required
+                    maxlength="20000" spellcheck="true"
+                    placeholder="Paste headline or article text…"></textarea>
+          <div class="editor-foot">
+            <span class="char-count" id="char-count" aria-live="polite">0 characters</span>
+            <span class="actions">
+              <button class="btn btn-ghost btn-sm" type="button" id="sample-btn">Try a sample</button>
+              <button class="btn btn-ghost btn-sm" type="button" id="clear-btn">Clear</button>
+              <button class="btn btn-accent" type="submit" id="submit-btn">
+                {{ icon('search', 16) }} Analyze News
+              </button>
+            </span>
+          </div>
+        </div>
+
+        <p class="field-error" id="form-error" role="alert"></p>
+      </div>
+    </form>
+
+    <div class="scan-overlay" id="scan-overlay" role="status" aria-live="polite" aria-busy="false">
+      <p class="scan-title">{{ icon('spark', 14) }} Analysis in progress</p>
+      <ol class="scan-stages" id="scan-stages">
+        <li class="scan-stage" data-stage><span class="stage-mark">1</span> Reading article</li>
+        <li class="scan-stage" data-stage><span class="stage-mark">2</span> Analyzing language</li>
+        <li class="scan-stage" data-stage><span class="stage-mark">3</span> Comparing patterns</li>
+        <li class="scan-stage" data-stage><span class="stage-mark">4</span> Generating prediction</li>
+        <li class="scan-stage" data-stage><span class="stage-mark">5</span> Checking source record</li>
+      </ol>
+      <div class="scan-progress"><i id="scan-progress-bar"></i></div>
+    </div>
+  </section>
+
+  <aside class="side-note">
+    <section class="card">
+      <h3>What happens here</h3>
+      <ul class="side-list">
+        <li>{{ icon('doc', 16) }}<span>The text is normalised — HTML, links and noise removed.</span></li>
+        <li>{{ icon('spark', 16) }}<span>TF-IDF features and writing-style statistics are computed.</span></li>
+        <li>{{ icon('search', 16) }}<span>The trained classifier returns a FAKE / REAL prediction.</span></li>
+        <li>{{ icon('hash', 16) }}<span>A SHA-256 fingerprint is written to the integrity ledger.</span></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h3>Fact check</h3>
+      <div class="balance">
+        <span class="balance-side"><strong>Claim</strong><span>what is stated</span></span>
+        {{ icon('scale', 26) }}
+        <span class="balance-side"><strong>Evidence</strong><span>what the model saw</span></span>
+      </div>
+      <p class="notice-bar notice-info">
+        {{ icon('shield', 16) }}
+        <span>The result is an <strong>AI model prediction</strong>, not a statement that the
+        content is true or false.</span>
+      </p>
+    </section>
+
+    <section class="card">
+      <h3>System status</h3>
+      <ul class="side-list">
+        <li>
+          <span class="dot {{ 'dot-ok' if model_ready else 'dot-bad' }}"></span>
+          <span>Classifier <strong>{{ 'loaded' if model_ready else 'not trained' }}</strong></span>
+        </li>
+        <li>
+          <span class="dot dot-ok"></span>
+          <span>Local integrity ledger <strong>active</strong></span>
+        </li>
+        <li>
+          <span class="dot {{ 'dot-ok' if chain.blockchain.connected else 'dot-warn' }}"></span>
+          <span>Ethereum anchor
+            <strong>{{ 'connected' if chain.blockchain.connected else 'unavailable' }}</strong>
+          </span>
+        </li>
+      </ul>
+      {% if not model_ready %}
+        <p class="notice-bar notice-bad">
+          {{ icon('x', 16) }}
+          <span>{{ model_error or "Train the model first:" }}
+            <code>python scripts/train.py</code></span>
+        </p>
+      {% endif %}
+    </section>
+  </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/analyze.js') }}" defer></script>
+{% endblock %}

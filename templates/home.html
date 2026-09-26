@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, section_heading, verdict_badge, source_badge %}
+{% block title %}TRUTHLINE · Separate Facts from Fiction{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="shell hero-inner">
+    <div class="hero-copy">
+      <span class="hero-eyebrow">{{ icon('shield', 13) }} AI + Blockchain News Verification</span>
+      <h1>Separate Facts from <em>Fiction</em>.</h1>
+      <p class="hero-lead">
+        Analyze news with Artificial Intelligence and verify its source through
+        blockchain-based traceability — an intelligent digital newsroom where AI
+        investigates the story and the ledger preserves the record.
+      </p>
+
+      <div class="hero-actions">
+        <a class="btn btn-accent btn-lg" href="{{ url_for('analyze') }}">
+          {{ icon('search', 16) }} Check a News Story
+        </a>
+        <a class="btn btn-outline btn-lg" href="{{ url_for('verify') }}">
+          {{ icon('chain', 16) }} Verify a Source
+        </a>
+      </div>
+
+      <div class="hero-meta">
+        <div>
+          <strong>{{ recent | length }}</strong>
+          <span>Recent analyses</span>
+        </div>
+        <div>
+          <strong>{{ (accuracy * 100) | round(1) if accuracy else '—' }}%</strong>
+          <span>Hold-out accuracy</span>
+        </div>
+        <div>
+          <strong>SHA-256</strong>
+          <span>Content fingerprint</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+      <div class="hv-scene">
+        <div class="hv-paper">
+          <div class="hv-rule short"></div>
+          <p class="hv-headline">Officials dispute the viral claim circulating online this week</p>
+          <div class="hv-rule"></div>
+          <div class="hv-cols">
+            <div class="hv-lines"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="hv-lines"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+        </div>
+
+        <div class="hv-glass"><span class="hv-scan"></span></div>
+
+        <span class="hv-chip hv-chip-real">{{ icon('check', 12) }} Real</span>
+        <span class="hv-chip hv-chip-fake">{{ icon('x', 12) }} Fake</span>
+
+        <div class="hv-shield">
+          {{ icon('shield', 20) }}
+          Verified<br>Record
+        </div>
+
+        <svg class="hv-nodes" viewBox="0 0 260 70" fill="none" aria-hidden="true">
+          <path d="M20 55 L130 18 L240 52 M130 18 L120 62" stroke="currentColor" stroke-width="1.4" opacity=".6"/>
+          <circle cx="20" cy="55" r="5" stroke="currentColor" stroke-width="1.8"/>
+          <circle cx="130" cy="18" r="6" stroke="currentColor" stroke-width="1.8"/>
+          <circle cx="240" cy="52" r="5" stroke="currentColor" stroke-width="1.8"/>
+          <circle cx="120" cy="62" r="4" stroke="currentColor" stroke-width="1.8"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="shell">
+    <div class="trust-strip">
+      <div class="trust-item">
+        {{ icon('spark', 22) }}
+        <div>
+          <h2>AI linguistic analysis</h2>
+          <p>TF-IDF features and writing-style statistics trained on labelled news articles.</p>
+        </div>
+      </div>
+      <div class="trust-item">
+        {{ icon('hash', 22) }}
+        <div>
+          <h2>Tamper-evident ledger</h2>
+          <p>Every verdict is chained to the previous record with a SHA-256 content hash.</p>
+        </div>
+      </div>
+      <div class="trust-item">
+        {{ icon('scale', 22) }}
+        <div>
+          <h2>Claim against evidence</h2>
+          <p>Model output is presented as a prediction — never as a statement of fact.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    {{ section_heading("Latest analysis", kicker="From the newsroom desk") }}
+
+    {% if recent %}
+      <div class="grid grid-3">
+        {% for record in recent %}
+        <article class="story-card reveal">
+          <div class="story-meta">
+            <span>{{ record.created_at.strftime('%d %b %Y') if record.created_at else '—' }}</span>
+            {{ verdict_badge(record.predicted_label) }}
+          </div>
+          <h3 class="story-headline">{{ record.title or record.text[:110] ~ '…' }}</h3>
+          <p class="story-excerpt">{{ record.text[:170] }}…</p>
+          <div class="story-foot">
+            <span class="muted">Confidence {{ (record.confidence * 100) | round(1) }}%</span>
+            <a href="{{ url_for('trace', prediction_id=record.id) }}">View trace {{ icon('arrow', 13) }}</a>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="card empty-state">
+        <p>No classifications yet. The desk is waiting for its first story.</p>
+        <a class="btn btn-outline" href="{{ url_for('analyze') }}">Analyze the first article</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="shell">
+    {{ section_heading("How the system works", kicker="Pipeline overview") }}
+    <div class="grid grid-4">
+      <div class="card reveal">
+        <p class="card-title">01 — Submit</p>
+        <h3>Paste the story</h3>
+        <p class="muted">A headline or full article is submitted through the analysis workspace.</p>
+      </div>
+      <div class="card reveal">
+        <p class="card-title">02 — Analyze</p>
+        <h3>AI reads the language</h3>
+        <p class="muted">Text is normalised, vectorised and scored against the trained model.</p>
+      </div>
+      <div class="card reveal">
+        <p class="card-title">03 — Record</p>
+        <h3>Hash the result</h3>
+        <p class="muted">The article fingerprint and verdict are appended to the integrity ledger.</p>
+      </div>
+      <div class="card reveal">
+        <p class="card-title">04 — Verify</p>
+        <h3>Trace the source</h3>
+        <p class="muted">Anyone can re-check the record later and confirm nothing changed.</p>
+      </div>
+    </div>
+    <div class="actions mt-lg">
+      <a class="btn btn-primary" href="{{ url_for('how_it_works') }}">See the full pipeline</a>
+    </div>
+  </div>
+</section>
+
+<section class="section section-ink">
+  <div class="shell center">
+    <h2>Ready to check a story?</h2>
+    <p class="lead-on-ink">
+      Submit an article to the analysis workspace and get a fact-check report with a
+      traceability record you can re-verify at any time.
+    </p>
+    <div class="actions actions-center">
+      <a class="btn btn-gold btn-lg" href="{{ url_for('analyze') }}">Check a News Story</a>
+      <a class="btn btn-outline btn-lg btn-outline-light" href="{{ url_for('verify') }}">
+        Verify a Source
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}

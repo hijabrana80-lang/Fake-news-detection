@@ -1,0 +1,77 @@
+{# ------------------------------------------------------------------ #}
+{# Reusable editorial UI components. Keep page templates thin.         #}
+{# ------------------------------------------------------------------ #}
+
+{% macro icon(name, size=18, cls="") %}
+<span class="icon{{ ' ' ~ cls if cls }}" aria-hidden="true">
+  {%- if name == "news" -%}
+    <svg viewBox="0 0 24 24" width="{{ size }}" height="{{ size }}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13v14a1 1 0 0 0 1 1H5a1 1 0 0 1-1-1V5z"/><path d="M17 8h2a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-2"/><path d="M7 9h7M7 13h7M7 17h4"/></svg>
+  {%- elif name == "search" -%}
+    <svg viewBox="0 0 24 24" width="{{ size }}" height="{{ size }}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+  {%- elif name == "shield" -%}
+    <svg viewBox="0 0 24 24" width="{{ size }}" height="{{ size }}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5.5c0 4.3-2.9 7.9-7 9.5-4.1-1.6-7-5.2-7-9.5V6l7-3z"/><path d="M9 12l2.2 2.2L15.5 10"/></svg>
+  {%- elif name == "scale" -%}
+    <svg viewBox="0 0 24 24" width="{{ size }}" height="{{ size }}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M7 20h10M4.5 8h15M6.5 8L4 14h5L6.5 8zM17.5 8L15 14h5l-2.5-6z"/><path d="M4 14a2.5 2.5 0 0 0 5 0M15 14a2.5 2.5 0 0 0 5 0"/></svg>
+  {%- elif name == "chain" -%}
+    <svg viewBox="0 0 24 24" width="{{ size }}" height="{{ size }}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="7" rx="1.6"/><rect x="14" y="13" width="7" height="7" rx="1.6"/><path d="M10 7.5h4.5a2 2 0 0 1 2 2V13"/><path d="M6.5 11v3a2 2 0 0 0 2 2H14"/></svg>
+  {%- elif name == "nodes" -%}
+    <svg viewBox="0 0 24 24" width="{{ size }}" height="{{ size }}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.2"/><circle cx="5" cy="18" r="2.2"/><circle cx="19" cy="18" r="2.2"/><path d="M10.6 6.9L6.4 16.1M13.4 6.9l4.2 9.2M7.2 18h9.6"/></svg>
+  {%- elif name == "spark" -%}
+    <svg viewBox="0 0 24 24" width="{{ size }}" height="{{ size }}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l1.9 4.6 4.6 1.9-4.6 1.9L12 16.5l-1.9-4.6L5.5 10l4.6-1.9L12 3.5z"/><path d="M18.5 16.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8.8-2z"/></svg>
+  {%- elif name == "check" -%}
+    <svg viewBox="0 0 24 24" width="{{ size }}" height="{{ size }}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+  {%- elif name == "x" -%}
+    <svg viewBox="0 0 24 24" width="{{ size }}" height="{{ size }}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  {%- elif name == "clock" -%}
+    <svg viewBox="0 0 24 24" width="{{ size }}" height="{{ size }}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 1.8"/></svg>
+  {%- elif name == "hash" -%}
+    <svg viewBox="0 0 24 24" width="{{ size }}" height="{{ size }}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L7.5 20M16.5 4L15 20M4.5 9h15M3.5 15h15"/></svg>
+  {%- elif name == "arrow" -%}
+    <svg viewBox="0 0 24 24" width="{{ size }}" height="{{ size }}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6.5L18.5 12 13 17.5"/></svg>
+  {%- elif name == "doc" -%}
+    <svg viewBox="0 0 24 24" width="{{ size }}" height="{{ size }}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7l-4-4z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg>
+  {%- endif -%}
+</span>
+{% endmacro %}
+
+
+{% macro section_heading(text, kicker=None) %}
+<div class="section-head">
+  {% if kicker %}<span class="kicker">{{ kicker }}</span>{% endif %}
+  <h2 class="section-title">{{ text }}</h2>
+  <span class="section-rule" aria-hidden="true"></span>
+</div>
+{% endmacro %}
+
+
+{% macro verdict_badge(label) %}
+<span class="badge {{ 'badge-fake' if label == 'FAKE' else 'badge-real' }}">
+  {{ icon('x' if label == 'FAKE' else 'check', 12) }}{{ label }}
+</span>
+{% endmacro %}
+
+
+{% macro source_badge(status) %}
+<span class="badge {{ 'badge-onchain' if status.on_chain else ('badge-local' if status.code != 'none' else 'badge-none') }}">
+  {{ status.label }}
+</span>
+{% endmacro %}
+
+
+{% macro stat_card(label, value, note=None, tone="") %}
+<div class="stat-card {{ 'stat-' ~ tone if tone }}">
+  <span class="stat-label">{{ label }}</span>
+  <strong class="stat-value">{{ value }}</strong>
+  {% if note %}<span class="stat-note">{{ note }}</span>{% endif %}
+</div>
+{% endmacro %}
+
+
+{% macro step(num, title, text, icon_name) %}
+<li class="step">
+  <span class="step-num">{{ num }}</span>
+  <span class="step-icon">{{ icon(icon_name, 20) }}</span>
+  <h3 class="step-title">{{ title }}</h3>
+  <p class="step-text">{{ text }}</p>
+</li>
+{% endmacro %}

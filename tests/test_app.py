@@ -224,3 +224,113 @@ def test_api_endpoints_return_json(client, endpoint):
     response = client.get(endpoint)
     assert response.content_type.startswith("application/json")
     assert response.get_json() is not None
+
+
+# --------------------------------------------------------------------------- #
+# Redesigned pages
+# --------------------------------------------------------------------------- #
+@pytest.mark.parametrize(
+    "endpoint, marker",
+    [
+        ("/analyze", b"Fact Check Workspace"),
+        ("/verify", b"Trace the origin"),
+        ("/dashboard", b"Analysis at a glance"),
+        ("/how-it-works", b"How the system works"),
+        ("/about", b"Final Year Project"),
+    ],
+)
+def test_redesigned_pages_render(client, endpoint, marker):
+    response = client.get(endpoint)
+    assert response.status_code == 200
+    assert b"TRUTHLINE" in response.data
+    assert marker in response.data
+
+
+def test_analyze_page_offers_the_staged_workspace(client):
+    html = client.get("/analyze").data
+    assert b'id="analyze-form"' in html
+    assert b'id="scan-overlay"' in html
+    assert html.count(b"data-stage") == 5
+
+
+def test_verify_page_without_query_explains_itself(client):
+    html = client.get("/verify").data
+    assert b"Record ID / Transaction Hash" in html
+    assert b"No record found" not in html
+
+
+def test_verify_page_reports_unknown_reference(client):
+    html = client.get("/verify", query_string={"q": "NEWS-99999"}).data
+    assert b"No record found" in html
+
+
+def test_verify_page_issues_a_certificate_for_a_known_record(client):
+    created = client.post("/api/predict", json={"text": SHOUTY_TEXT}).get_json()
+    ref = f"NEWS-{created['record']['id']:05d}"
+
+    html = client.get("/verify", query_string={"q": ref}).data
+    assert ref.encode() in html
+    assert b"Verification Certificate" in html
+    assert b"VERIFIED" in html
+
+
+def test_verify_page_never_claims_blockchain_without_a_transaction(client):
+    created = client.post("/api/predict", json={"text": SHOUTY_TEXT}).get_json()
+    ref = f"NEWS-{created['record']['id']:05d}"
+
+    html = client.get("/verify", query_string={"q": ref}).data
+    assert b"Blockchain verification unavailable" in html
+    assert b"Blockchain record confirmed" not in html
+
+
+def test_api_verify_get_returns_certificate_data(client):
+    created = client.post("/api/predict", json={"text": SHOUTY_TEXT}).get_json()
+    ref = f"NEWS-{created['record']['id']:05d}"
+
+    response = client.get(f"/api/verify/{ref}")
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["found"] is True
+    assert payload["integrity"] == "VERIFIED"
+    assert payload["hash_matches"] is True
+    assert payload["blockchain"]["available"] is False
+
+
+def test_api_verify_get_unknown_reference_is_404(client):
+    assert client.get("/api/verify/NEWS-99999").status_code == 404
+
+
+def test_api_verify_post_agrees_with_get(client):
+    created = client.post("/api/predict", json={"text": SHOUTY_TEXT}).get_json()
+    ref = f"NEWS-{created['record']['id']:05d}"
+
+    assert client.post("/api/verify", json={"query": ref}).get_json()["integrity"] == "VERIFIED"
+    assert client.post("/api/verify", json={}).status_code == 400
+
+
+def test_api_stats_reports_measured_counts(client):
+    client.post("/api/predict", json={"text": SHOUTY_TEXT})
+    client.post("/api/predict", json={"text": VALID_TEXT})
+
+    payload = client.get("/api/stats").get_json()
+    assert payload["total"] == 2
+    assert payload["fake"] == 1
+    assert payload["real"] == 1
+    assert payload["fake"] + payload["real"] == payload["total"]
+    assert payload["on_chain"] == 0
+    assert payload["blockchain_available"] is False
+    assert len(payload["recent"]) == 2
+
+
+def test_dashboard_page_shows_only_measured_figures(client):
+    client.post("/api/predict", json={"text": SHOUTY_TEXT})
+
+    html = client.get("/dashboard").data
+    assert b"Total stories analyzed" in html
+    assert b"Recent analysis" in html
+    assert b"Blockchain verification unavailable" in html
+
+
+def test_dashboard_and_history_render_when_empty(client):
+    assert b"Analysis at a glance" in client.get("/dashboard").data
+    assert b"No classifications yet" in client.get("/history").data

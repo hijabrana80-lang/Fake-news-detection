@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, section_heading, step %}
+{% block title %}How It Works · TRUTHLINE{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div class="shell">
+    <span class="kicker">System Pipeline</span>
+    <h1>How the system works</h1>
+    <p>Seven stages take a submitted story from raw text to a re-verifiable record —
+       four belong to the AI model, three belong to the traceability ledger.</p>
+  </div>
+</div>
+
+<section class="section-tight">
+  <div class="shell">
+    {{ section_heading("The seven stages", kicker="Submission to verification") }}
+
+    <ol class="pipeline">
+      <li class="pipeline-step reveal">
+        <span class="num">01</span>
+        {{ icon('doc', 20) }}
+        <h3>News submission</h3>
+        <p>A headline or article body is pasted into the analysis workspace.</p>
+      </li>
+      <li class="pipeline-step reveal">
+        <span class="num">02</span>
+        {{ icon('search', 20) }}
+        <h3>Preprocessing</h3>
+        <p>HTML, links and noise are stripped; the text is lower-cased and normalised.</p>
+      </li>
+      <li class="pipeline-step reveal">
+        <span class="num">03</span>
+        {{ icon('spark', 20) }}
+        <h3>Feature extraction</h3>
+        <p>TF-IDF 1–2 grams plus eight writing-style statistics form the feature vector.</p>
+      </li>
+      <li class="pipeline-step reveal">
+        <span class="num">04</span>
+        {{ icon('scale', 20) }}
+        <h3>AI classification</h3>
+        <p>Logistic Regression returns a FAKE / REAL label with a probability for each.</p>
+      </li>
+      <li class="pipeline-step reveal">
+        <span class="num">05</span>
+        {{ icon('hash', 20) }}
+        <h3>Content fingerprint</h3>
+        <p>SHA-256 is computed over the article text as its permanent fingerprint.</p>
+      </li>
+      <li class="pipeline-step reveal">
+        <span class="num">06</span>
+        {{ icon('nodes', 20) }}
+        <h3>Ledger entry</h3>
+        <p>The record is appended to the hash chain, linked by its previous entry hash.</p>
+      </li>
+      <li class="pipeline-step reveal">
+        <span class="num">07</span>
+        {{ icon('shield', 20) }}
+        <h3>Verification</h3>
+        <p>Anyone re-runs the fingerprint check and walks the chain back to genesis.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="shell">
+    {{ section_heading("Two different questions", kicker="AI versus blockchain") }}
+
+    <div class="compare">
+      <article class="compare-card compare-ai reveal">
+        <h3>{{ icon('spark', 20) }} The AI model</h3>
+        <p>Answers: <strong>“Does this text read like the labelled examples it was trained on?”</strong></p>
+        <ul class="side-list">
+          <li>{{ icon('check', 16) }}<span>Trained on 1,991 curated ISOT news articles.</span></li>
+          <li>{{ icon('check', 16) }}<span>Outputs a probability, not a certainty.</span></li>
+          <li>{{ icon('x', 16) }}<span>Cannot confirm whether a claim is factually true.</span></li>
+        </ul>
+        <blockquote>Predicts the writing pattern — never the truth.</blockquote>
+      </article>
+
+      <article class="compare-card compare-chain reveal">
+        <h3>{{ icon('chain', 20) }} The traceability ledger</h3>
+        <p>Answers: <strong>“Has this stored record been altered since it was written?”</strong></p>
+        <ul class="side-list">
+          <li>{{ icon('check', 16) }}<span>SHA-256 fingerprint of the exact submitted text.</span></li>
+          <li>{{ icon('check', 16) }}<span>Hash chain links every entry back to genesis.</span></li>
+          <li>{{ icon('x', 16) }}<span>Does not — and cannot — judge the article's content.</span></li>
+        </ul>
+        <blockquote>Proves the record is unchanged — not that the story is true.</blockquote>
+      </article>
+    </div>
+
+    <p class="notice-bar notice-info">
+      {{ icon('scale', 16) }}
+      <span><strong>Why both?</strong> A verdict that cannot be audited is untrustworthy,
+      and a record that cannot be re-checked proves nothing. The model produces the verdict;
+      the ledger makes the verdict accountable.</span>
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    {{ section_heading("Technical stack", kicker="Under the hood") }}
+    <div class="grid grid-3">
+      <div class="card">
+        <p class="card-title">Machine learning</p>
+        <ul class="side-list">
+          <li>{{ icon('spark', 16) }}<span>TF-IDF vectoriser, 1–2 grams, 15k cap</span></li>
+          <li>{{ icon('spark', 16) }}<span>Eight hand-crafted style features</span></li>
+          <li>{{ icon('spark', 16) }}<span>Logistic Regression classifier</span></li>
+          <li>{{ icon('spark', 16) }}<span>NLTK English stop-word list</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="card-title">Traceability</p>
+        <ul class="side-list">
+          <li>{{ icon('hash', 16) }}<span>SHA-256 content fingerprints</span></li>
+          <li>{{ icon('nodes', 16) }}<span>Append-only local hash chain</span></li>
+          <li>{{ icon('chain', 16) }}<span>Solidity <code>NewsTrace.sol</code> anchor</span></li>
+          <li>{{ icon('chain', 16) }}<span>Optional Ethereum-compatible RPC node</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="card-title">Application</p>
+        <ul class="side-list">
+          <li>{{ icon('news', 16) }}<span>Flask routes, JSON API and Jinja templates</span></li>
+          <li>{{ icon('news', 16) }}<span>SQLAlchemy + SQLite persistence</span></li>
+          <li>{{ icon('news', 16) }}<span>Vanilla HTML, CSS and JavaScript</span></li>
+          <li>{{ icon('news', 16) }}<span>57 automated pytest checks</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="actions mt-lg">
+      <a class="btn btn-accent" href="{{ url_for('analyze') }}">Run the pipeline</a>
+      <a class="btn btn-outline" href="{{ url_for('metrics') }}">View model metrics</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

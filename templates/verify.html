@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, section_heading, verdict_badge, source_badge %}
+{% block title %}Verify Source · TRUTHLINE{% endblock %}
+
+{% block content %}
+<section class="verify-hero">
+  <svg class="net-canvas" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <line x1="60" y1="320" x2="260" y2="140"/>
+    <line x1="260" y1="140" x2="520" y2="260"/>
+    <line x1="520" y1="260" x2="760" y2="110"/>
+    <line x1="760" y1="110" x2="980" y2="300"/>
+    <line x1="980" y1="300" x2="1150" y2="170"/>
+    <line x1="260" y1="140" x2="520" y2="70"/>
+    <line x1="520" y1="70" x2="760" y2="110"/>
+    <line x1="520" y1="260" x2="640" y2="370"/>
+    <circle cx="60" cy="320" r="6"/>
+    <circle cx="260" cy="140" r="8"/>
+    <circle cx="520" cy="260" r="7"/>
+    <circle cx="760" cy="110" r="9"/>
+    <circle cx="980" cy="300" r="6"/>
+    <circle cx="1150" cy="170" r="7"/>
+    <circle cx="520" cy="70" r="5"/>
+    <circle cx="640" cy="370" r="5"/>
+  </svg>
+
+  <div class="shell">
+    <span class="kicker kicker-light">Source Traceability</span>
+    <h1>Trace the origin. Verify the record.</h1>
+    <p>Enter a record ID or transaction hash to retrieve the stored analysis and its
+       traceability record. The fingerprint is recomputed and re-checked against the ledger.</p>
+  </div>
+</section>
+
+<div class="shell verify-form-card">
+  <div class="card">
+    <form class="verify-form" method="get" action="{{ url_for('verify') }}" role="search">
+      <label class="field" for="verify-query">
+        <span class="field-label"><span>Record ID / Transaction Hash</span></span>
+        <input class="input" type="text" id="verify-query" name="q" value="{{ query }}"
+               placeholder="NEWS-00001  ·  0x9f2a…  ·  a41c8d3e…"
+               autocomplete="off" spellcheck="false">
+      </label>
+      <button class="btn btn-accent btn-lg" type="submit">
+        {{ icon('shield', 16) }} Verify Record
+      </button>
+    </form>
+
+    <div class="field-meta">
+      <span>Accepted: <code>NEWS-00001</code>, numeric ID, SHA-256 content hash, ledger entry hash or transaction hash.</span>
+      <a href="{{ url_for('history') }}">Browse all records</a>
+    </div>
+  </div>
+</div>
+
+<section class="section-tight">
+  <div class="shell">
+    {# ---------------------------------------------------------------- #}
+    {# No query yet — explain the page                                   #}
+    {# ---------------------------------------------------------------- #}
+    {% if resolution is none %}
+      <div class="grid grid-3">
+        <div class="card reveal">
+          <p class="card-title">Step 01</p>
+          <h3>Find a reference</h3>
+          <p class="muted">Every analysis receives a public reference such as
+             <code>NEWS-00001</code>, shown on the fact-check report.</p>
+        </div>
+        <div class="card reveal">
+          <p class="card-title">Step 02</p>
+          <h3>Retrieve the record</h3>
+          <p class="muted">The stored article fingerprint, prediction, model version and
+             ledger entries are loaded for inspection.</p>
+        </div>
+        <div class="card reveal">
+          <p class="card-title">Step 03</p>
+          <h3>Re-check integrity</h3>
+          <p class="muted">SHA-256 is recomputed from the stored text and the full hash chain
+             is walked back to genesis.</p>
+        </div>
+      </div>
+
+    {# ---------------------------------------------------------------- #}
+    {# Not found                                                        #}
+    {# ---------------------------------------------------------------- #}
+    {% elif not resolution.found %}
+      <div class="card">
+        <p class="notice-bar notice-bad">
+          {{ icon('x', 16) }}
+          <span><strong>No record found for <code>{{ resolution.query }}</code>.</strong>
+            Check the reference and try again, or browse the analysis history.</span>
+        </p>
+        <div class="actions mt-lg">
+          <a class="btn btn-outline" href="{{ url_for('history') }}">Analysis history</a>
+          <a class="btn btn-primary" href="{{ url_for('analyze') }}">Analyze a story</a>
+        </div>
+      </div>
+
+    {# ---------------------------------------------------------------- #}
+    {# Record found — verification certificate                           #}
+    {# ---------------------------------------------------------------- #}
+    {% else %}
+      {% set r = resolution.record %}
+      <article class="certificate reveal">
+        <header class="certificate-head">
+          <div>
+            <p class="card-title mb-sm">Verification Certificate</p>
+            <h2>Source Record Integrity</h2>
+          </div>
+          <span class="seal {{ '' if resolution.integrity == 'VERIFIED' else 'is-failed' }}">
+            {{ icon('check' if resolution.integrity == 'VERIFIED' else 'x', 15) }}
+            {{ resolution.integrity }}
+          </span>
+        </header>
+
+        <div class="certificate-body">
+          <p class="certificate-id">{{ resolution.ref }}</p>
+
+          <div class="grid grid-2">
+            <section>
+              <p class="card-title">Article information</p>
+              <table class="kv-list">
+                <tr><th>Headline</th><td>{{ r.title or '—' }}</td></tr>
+                <tr><th>AI prediction</th>
+                    <td>{{ verdict_badge(r.predicted_label) }}
+                        · {{ (r.confidence * 100) | round(1) }}%</td></tr>
+                <tr><th>Model version</th><td>{{ r.model_version or '—' }}</td></tr>
+                <tr><th>Origin</th><td>{{ r.source | upper }}</td></tr>
+                <tr><th>Recorded</th>
+                    <td>{{ r.created_at.strftime('%Y-%m-%d %H:%M:%S UTC') if r.created_at else '—' }}</td></tr>
+                <tr><th>Content hash</th>
+                    <td><span class="hash-text">{{ r.content_hash }}</span></td></tr>
+              </table>
+            </section>
+
+            <section>
+              <p class="card-title">Integrity checks</p>
+              <ul class="side-list">
+                <li>
+                  <span class="dot {{ 'dot-ok' if resolution.hash_matches else 'dot-bad' }}"></span>
+                  <span>SHA-256 recomputed from stored text —
+                        <strong>{{ 'matches' if resolution.hash_matches else 'MISMATCH' }}</strong></span>
+                </li>
+                <li>
+                  <span class="dot {{ 'dot-ok' if resolution.chain_integrity else 'dot-bad' }}"></span>
+                  <span>Hash chain walked to genesis —
+                        <strong>{{ 'intact' if resolution.chain_integrity else 'BROKEN' }}</strong></span>
+                </li>
+                <li>
+                  <span class="dot {{ 'dot-ok' if resolution.entries else 'dot-warn' }}"></span>
+                  <span>Ledger entries linked to this record —
+                        <strong>{{ resolution.entries | length }}</strong></span>
+                </li>
+              </ul>
+
+              <div class="notice-bar {{ 'notice-ok' if resolution.on_chain else 'notice-warn' }}">
+                {{ icon('chain', 16) }}
+                <span>
+                  {% if resolution.on_chain %}
+                    <strong>Blockchain record confirmed.</strong> The content hash is anchored
+                    on chain and the transaction was retrieved successfully.
+                  {% else %}
+                    <strong>Blockchain verification unavailable.</strong> This record is held
+                    in the local integrity ledger only — no on-chain transaction was confirmed,
+                    so no blockchain claim is made here.
+                  {% endif %}
+                </span>
+              </div>
+            </section>
+          </div>
+
+          <hr>
+
+          <p class="card-title">Source traceability</p>
+          <div class="chain-visual">
+            <div class="chain-node is-ok">
+              <span class="chain-marker">{{ icon('doc', 18) }}</span>
+              <div class="chain-body">
+                <h3>News article</h3>
+                <p>Submitted text normalised and fingerprinted.</p>
+              </div>
+            </div>
+            <div class="chain-node {{ 'is-ok' if resolution.hash_matches else 'is-off' }}">
+              <span class="chain-marker">{{ icon('hash', 18) }}</span>
+              <div class="chain-body">
+                <h3>SHA-256 hash</h3>
+                <code>{{ r.content_hash }}</code>
+              </div>
+            </div>
+            <div class="chain-node {{ 'is-ok' if resolution.chain_integrity else 'is-off' }}">
+              <span class="chain-marker">{{ icon('nodes', 18) }}</span>
+              <div class="chain-body">
+                <h3>Ledger record</h3>
+                <p>{{ resolution.entries | length }} entr{{ 'y' if resolution.entries | length == 1 else 'ies' }}
+                   linked by prev_hash → entry_hash.</p>
+              </div>
+            </div>
+            <div class="chain-node {{ 'is-warn' if not resolution.on_chain else 'is-ok' }}">
+              <span class="chain-marker">{{ icon('shield', 18) }}</span>
+              <div class="chain-body">
+                <h3>Blockchain record</h3>
+                <p>
+                  {% if resolution.on_chain %}
+                    Confirmed on {{ resolution.entries[-1].network }}
+                    at block #{{ resolution.entries[-1].block_number }}.
+                  {% else %}
+                    Not available — local integrity ledger only.
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions mt-lg">
+            <a class="btn btn-primary" href="{{ url_for('trace', prediction_id=r.id) }}">Full trace report</a>
+            <a class="btn btn-outline" href="{{ url_for('result', prediction_id=r.id) }}">Fact check report</a>
+            <a class="btn btn-ghost" href="{{ url_for('api_verify_get', ref=resolution.ref) }}">Verification JSON</a>
+          </div>
+        </div>
+      </article>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

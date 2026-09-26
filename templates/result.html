@@ -1,72 +1,197 @@
 {% extends "base.html" %}
-{% block title %}Result · Fake News Detection{% endblock %}
+{% from "_macros.html" import icon, section_heading, verdict_badge %}
+{% block title %}Fact Check Report {{ ref }} · TRUTHLINE{% endblock %}
+
+{% set conf = (prediction.confidence * 100) | round(1) %}
+{% set is_fake = prediction.predicted_label == 'FAKE' %}
+{% set low_conf = prediction.confidence < 0.70 %}
 
 {% block content %}
-<section class="hero">
-  <p class="eyebrow">Classification result</p>
-  <h1>
-    This article is
-    <span class="{{ 'danger' if prediction.predicted_label == 'FAKE' else 'accent' }}">
-      {{ prediction.predicted_label }}
-    </span>
-  </h1>
-</section>
-
-<div class="grid-2">
-  <section class="card">
-    <div class="score {{ 'score-fake' if prediction.predicted_label == 'FAKE' else 'score-real' }}">
-      <div class="score-value">{{ (prediction.confidence * 100) | round(1) }}%</div>
-      <div class="score-label">confidence</div>
-      <div class="bar">
-        <div class="bar-fill" style="width: {{ (prediction.confidence * 100) | round(1) }}%"></div>
-      </div>
-    </div>
-
-    <h3 class="mt">Probability breakdown</h3>
-    <div class="prob-row">
-      <span class="prob-name danger">FAKE</span>
-      <div class="prob-track"><div class="prob-fill prob-fake" style="width: {{ (prediction.prob_fake * 100) | round(1) }}%"></div></div>
-      <span class="prob-num">{{ (prediction.prob_fake * 100) | round(1) }}%</span>
-    </div>
-    <div class="prob-row">
-      <span class="prob-name accent">REAL</span>
-      <div class="prob-track"><div class="prob-fill prob-real" style="width: {{ (prediction.prob_real * 100) | round(1) }}%"></div></div>
-      <span class="prob-num">{{ (prediction.prob_real * 100) | round(1) }}%</span>
-    </div>
-
-    <h3 class="mt">Submission</h3>
-    <table class="kv">
-      <tr><th>ID</th><td>#{{ prediction.id }}</td></tr>
-      {% if prediction.title %}<tr><th>Headline</th><td>{{ prediction.title }}</td></tr>{% endif %}
-      <tr><th>Received</th><td>{{ prediction.created_at.strftime('%Y-%m-%d %H:%M:%S UTC') if prediction.created_at else '—' }}</td></tr>
-      <tr><th>Source</th><td>{{ prediction.source | upper }}</td></tr>
-      <tr><th>Model</th><td>{{ prediction.model_version or '—' }}</td></tr>
-    </table>
-  </section>
-
-  <aside class="side">
-    <section class="card">
-      <h3>Traceability record</h3>
-      <table class="kv">
-        <tr><th>Content hash</th><td class="hash">{{ prediction.content_hash }}</td></tr>
-        {% for entry in entries %}
-          <tr><th>Ledger network</th><td>{{ entry.network }}</td></tr>
-          <tr><th>Entry hash</th><td class="hash">{{ entry.entry_hash }}</td></tr>
-          {% if entry.tx_hash %}<tr><th>Tx hash</th><td class="hash">{{ entry.tx_hash }}</td></tr>{% endif %}
-          {% if entry.block_number %}<tr><th>Block</th><td>#{{ entry.block_number }}</td></tr>{% endif %}
-        {% endfor %}
-      </table>
-      <div class="actions">
-        <a class="btn btn-ghost" href="{{ url_for('trace', prediction_id=prediction.id) }}">View full trace</a>
-        <a class="btn btn-ghost" href="{{ url_for('history') }}">History</a>
-        <a class="btn btn-primary" href="{{ url_for('home') }}">Check another</a>
-      </div>
-    </section>
-
-    <section class="card">
-      <h3>Article</h3>
-      <p class="article-preview">{{ prediction.text[:900] }}{% if prediction.text | length > 900 %}…{% endif %}</p>
-    </section>
-  </aside>
+<div class="page-head">
+  <div class="shell">
+    <span class="kicker">Fact Check Report</span>
+    <h1>{{ ref }}</h1>
+    <p>AI model prediction together with the source-traceability record written for this
+       article. The prediction and the record are two separate statements.</p>
+  </div>
 </div>
+
+<section class="section-tight">
+  <div class="shell report">
+
+    {# ------------------------------------------------------------------ #}
+    {# Left column — the verdict                                           #}
+    {# ------------------------------------------------------------------ #}
+    <div>
+      <article class="verdict-card {{ 'verdict-fake' if is_fake else 'verdict-real' }}">
+        <header class="verdict-top">
+          <div>
+            <p class="verdict-label">AI Model Prediction</p>
+            <h2>{{ prediction.predicted_label }}</h2>
+          </div>
+          <div class="verdict-score">
+            <strong>{{ conf }}%</strong>
+            <span>Model confidence</span>
+          </div>
+        </header>
+
+        <div class="verdict-body">
+          <p class="card-title">Probability breakdown</p>
+
+          <div class="prob-row">
+            <b>FAKE</b>
+            <span class="prob-track"><i class="prob-fill prob-fake"
+                  style="--w: {{ (prediction.prob_fake * 100) | round(1) }}%"></i></span>
+            <span class="prob-num">{{ (prediction.prob_fake * 100) | round(1) }}%</span>
+          </div>
+          <div class="prob-row">
+            <b>REAL</b>
+            <span class="prob-track"><i class="prob-fill prob-real"
+                  style="--w: {{ (prediction.prob_real * 100) | round(1) }}%"></i></span>
+            <span class="prob-num">{{ (prediction.prob_real * 100) | round(1) }}%</span>
+          </div>
+
+          {% if low_conf %}
+          <p class="notice-bar notice-warn">
+            {{ icon('scale', 16) }}
+            <span><strong>Low model confidence.</strong> At {{ conf }}% the classifier is close
+            to its decision boundary — treat this verdict as inconclusive and check independent
+            sources.</span>
+          </p>
+          {% endif %}
+
+          <p class="disclaimer">
+            This is an <strong>AI model prediction</strong> about the writing pattern of the
+            text. It is not a statement that the content is true or false, and it is not a
+            fact-check performed by a human.
+          </p>
+        </div>
+      </article>
+
+      <section class="card mt-lg">
+        <p class="card-title">Article information</p>
+        <table class="kv-list">
+          <tr><th>Reference</th><td><code>{{ ref }}</code></td></tr>
+          {% if prediction.title %}
+            <tr><th>Headline</th><td>{{ prediction.title }}</td></tr>
+          {% endif %}
+          <tr><th>Prediction</th><td>{{ verdict_badge(prediction.predicted_label) }}</td></tr>
+          <tr><th>Model confidence</th><td>{{ conf }}%</td></tr>
+          <tr><th>Probability FAKE / REAL</th>
+              <td>{{ (prediction.prob_fake * 100) | round(1) }}% /
+                  {{ (prediction.prob_real * 100) | round(1) }}%</td></tr>
+          <tr><th>Model version</th><td>{{ prediction.model_version or '—' }}</td></tr>
+          <tr><th>Received</th>
+              <td>{{ prediction.created_at.strftime('%Y-%m-%d %H:%M:%S UTC') if prediction.created_at else '—' }}</td></tr>
+          <tr><th>Origin</th><td>{{ prediction.source | upper }}</td></tr>
+        </table>
+      </section>
+
+      <section class="card mt-lg">
+        <p class="card-title">Submitted text</p>
+        <p class="story-excerpt">{{ prediction.text[:1400] }}{% if prediction.text | length > 1400 %}…{% endif %}</p>
+      </section>
+    </div>
+
+    {# ------------------------------------------------------------------ #}
+    {# Right column — traceability                                         #}
+    {# ------------------------------------------------------------------ #}
+    <aside>
+      <section class="card">
+        <p class="card-title">Source traceability</p>
+
+        <div class="chain-visual">
+          <div class="chain-node is-ok">
+            <span class="chain-marker">{{ icon('doc', 18) }}</span>
+            <div class="chain-body">
+              <h3>News article</h3>
+              <p>{{ prediction.text | length }} characters received
+                 from {{ prediction.source | upper }}.</p>
+            </div>
+          </div>
+
+          <div class="chain-node is-ok">
+            <span class="chain-marker">{{ icon('hash', 18) }}</span>
+            <div class="chain-body">
+              <h3>SHA-256 hash</h3>
+              <code>{{ prediction.content_hash }}</code>
+            </div>
+          </div>
+
+          <div class="chain-node {{ 'is-ok' if source.on_chain else 'is-warn' }}">
+            <span class="chain-marker">{{ icon('chain', 18) }}</span>
+            <div class="chain-body">
+              <h3>Blockchain record</h3>
+              {% if source.on_chain and entries %}
+                <p>Confirmed on {{ entries[-1].network }} at block
+                   #{{ entries[-1].block_number }}.</p>
+                <code>{{ entries[-1].tx_hash }}</code>
+              {% else %}
+                <p>Unavailable — held in the local integrity ledger instead.</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="chain-node is-ok">
+            <span class="chain-marker">{{ icon('shield', 18) }}</span>
+            <div class="chain-body">
+              <h3>Verification</h3>
+              <p>Fingerprint and hash chain can be re-checked at any time.</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="notice-bar {{ 'notice-ok' if source.on_chain else 'notice-warn' }}">
+          {{ icon('chain', 16) }}
+          <span>
+            {% if source.on_chain %}
+              <strong>Blockchain record confirmed.</strong> Anchored on {{ entries[-1].network }}.
+            {% else %}
+              <strong>Blockchain verification unavailable.</strong>
+              No on-chain transaction is attached to this record, so no blockchain claim is made.
+              Integrity is maintained by the SHA-256 hash chain.
+            {% endif %}
+          </span>
+        </p>
+
+        <div class="actions mt-lg">
+          <a class="btn btn-primary btn-sm" href="{{ url_for('trace', prediction_id=prediction.id) }}">Full trace</a>
+          <a class="btn btn-outline btn-sm" href="{{ url_for('verify', q=ref) }}">Verify source</a>
+        </div>
+      </section>
+
+      <section class="card mt-lg">
+        <p class="card-title">Ledger entries</p>
+        {% if entries %}
+        <div class="chain-list">
+          {% for entry in entries %}
+          <div class="chain-entry">
+            <strong>{{ entry.network }}</strong>
+            <span class="badge {{ 'badge-onchain' if entry.status == 'confirmed' else 'badge-local' }}">
+              {{ entry.status }}
+            </span>
+            <dl>
+              <dt>Entry hash</dt><dd>{{ entry.entry_hash }}</dd>
+              <dt>Prev hash</dt><dd>{{ entry.prev_hash[:24] }}…</dd>
+              {% if entry.tx_hash %}<dt>Tx</dt><dd>{{ entry.tx_hash }}</dd>{% endif %}
+            </dl>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+          <p class="muted">No ledger entries recorded for this article.</p>
+        {% endif %}
+      </section>
+
+      <section class="card mt-lg">
+        <p class="card-title">Next steps</p>
+        <div class="actions">
+          <a class="btn btn-accent btn-sm" href="{{ url_for('analyze') }}">Analyze another</a>
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('dashboard') }}">Dashboard</a>
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('history') }}">History</a>
+        </div>
+      </section>
+    </aside>
+  </div>
+</section>
 {% endblock %}

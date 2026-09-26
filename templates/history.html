@@ -1,50 +1,80 @@
 {% extends "base.html" %}
-{% block title %}History · Fake News Detection{% endblock %}
+{% from "_macros.html" import icon, section_heading, verdict_badge %}
+{% block title %}Analysis History · TRUTHLINE{% endblock %}
 
 {% block content %}
-<section class="hero">
-  <h1>Classification history</h1>
-  <p class="lead">Every submitted article, its verdict and its ledger anchor.</p>
-</section>
-
-<section class="card">
-  {% if predictions %}
-  <div class="table-wrap">
-    <table class="data">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Headline</th>
-          <th>Verdict</th>
-          <th>Confidence</th>
-          <th class="col-hash">Content hash</th>
-          <th class="col-tx">Tx</th>
-          <th class="col-when">When</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for p in predictions %}
-        <tr>
-          <td class="muted">{{ p.id }}</td>
-          <td class="cell-title">{{ p.title or (p.text[:70] ~ '…') }}</td>
-          <td>
-            <span class="badge {{ 'badge-fake' if p.predicted_label == 'FAKE' else 'badge-real' }}">
-              {{ p.predicted_label }}
-            </span>
-          </td>
-          <td>{{ (p.confidence * 100) | round(1) }}%</td>
-          <td class="hash-cell col-hash" title="{{ p.content_hash }}">{{ p.content_hash[:16] }}…</td>
-          <td class="col-tx">{% if p.tx_hash %}<span class="badge badge-chain" title="{{ p.tx_hash }}">on-chain</span>{% else %}<span class="muted">local</span>{% endif %}</td>
-          <td class="muted col-when">{{ p.created_at.strftime('%Y-%m-%d %H:%M') if p.created_at else '—' }}</td>
-          <td><a class="link" href="{{ url_for('trace', prediction_id=p.id) }}">trace</a></td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+<div class="page-head">
+  <div class="shell">
+    <span class="kicker">Newsroom Desk Log</span>
+    <h1>Analysis history</h1>
+    <p>Every submitted article, its verdict, its model confidence and how its traceability
+       record is anchored. Newest first.</p>
   </div>
-  {% else %}
-    <p class="empty">No classifications yet. <a class="link" href="{{ url_for('home') }}">Check your first article →</a></p>
-  {% endif %}
+</div>
+
+<section class="section-tight">
+  <div class="shell">
+    {{ section_heading("Submitted stories", kicker=predictions | length ~ " records") }}
+
+    {% if predictions %}
+    <div class="card">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="cell-hide-tiny">Time</th>
+              <th>Headline</th>
+              <th>Prediction</th>
+              <th class="cell-hide-narrow">Confidence</th>
+              <th class="cell-hide-md">Content hash</th>
+              <th>Source</th>
+              <th scope="col"><span class="sr-only">Record links</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in predictions %}
+            <tr>
+              <td class="cell-time cell-hide-tiny">{{ p.created_at.strftime('%Y-%m-%d %H:%M') if p.created_at else '—' }}</td>
+              <td class="cell-headline" title="{{ p.title or p.text[:120] }}">
+                {{ p.title or (p.text[:70] ~ '…') }}
+              </td>
+              <td>{{ verdict_badge(p.predicted_label) }}</td>
+              <td class="cell-hide-narrow">{{ (p.confidence * 100) | round(1) }}%</td>
+              <td class="cell-mono cell-hide-md">{{ p.content_hash[:16] }}…</td>
+              <td>
+                {% if p.tx_hash %}
+                  <span class="badge badge-onchain">Blockchain</span>
+                {% elif p.ledger_entries %}
+                  <span class="badge badge-local">Local ledger</span>
+                {% else %}
+                  <span class="badge badge-none">No record</span>
+                {% endif %}
+              </td>
+              <td class="cell-links">
+                <a href="{{ url_for('result', prediction_id=p.id) }}">report</a>
+                <a href="{{ url_for('trace', prediction_id=p.id) }}">trace</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="actions mt-lg">
+      <a class="btn btn-accent" href="{{ url_for('analyze') }}">Analyze another story</a>
+      <a class="btn btn-outline" href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a class="btn btn-ghost" href="{{ url_for('api_history') }}">History JSON</a>
+    </div>
+    {% else %}
+    <div class="card empty-state">
+      {{ icon('news', 28) }}
+      <p>No classifications yet.</p>
+      <p class="muted">The desk is waiting for its first story — submit an article and the
+         verdict, fingerprint and ledger entry will appear here.</p>
+      <a class="btn btn-accent" href="{{ url_for('analyze') }}">Check your first article</a>
+    </div>
+    {% endif %}
+  </div>
 </section>
 {% endblock %}

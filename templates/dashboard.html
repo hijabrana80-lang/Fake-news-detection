@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, section_heading, verdict_badge %}
+{% block title %}Dashboard · TRUTHLINE{% endblock %}
+
+{% set C = 326.73 %}
+{% set total = stats.total %}
+{% set real_len = (stats.real / total * C) if total else 0 %}
+{% set fake_len = (stats.fake / total * C) if total else 0 %}
+
+{% block content %}
+<div class="page-head">
+  <div class="shell">
+    <span class="kicker">Newsroom Intelligence Dashboard</span>
+    <h1>Analysis at a glance</h1>
+    <p>Live figures read from the application database — nothing on this page is simulated.
+       Blockchain records are counted only where a confirmed on-chain transaction exists.</p>
+  </div>
+</div>
+
+<section class="section-tight">
+  <div class="shell">
+    <div class="stat-grid">
+      <div class="stat-card reveal">
+        <span class="stat-label">Total stories analyzed</span>
+        <strong class="stat-value">{{ "{:,}".format(stats.total) }}</strong>
+        <span class="stat-note">Unique articles by content fingerprint</span>
+      </div>
+      <div class="stat-card stat-real reveal">
+        <span class="stat-label">Real predictions</span>
+        <strong class="stat-value">{{ stats.real }}</strong>
+        <span class="stat-note">{{ (stats.real / total * 100) | round(1) if total else 0 }}% of all analyses</span>
+      </div>
+      <div class="stat-card stat-fake reveal">
+        <span class="stat-label">Fake predictions</span>
+        <strong class="stat-value">{{ stats.fake }}</strong>
+        <span class="stat-note">{{ (stats.fake / total * 100) | round(1) if total else 0 }}% of all analyses</span>
+      </div>
+      <div class="stat-card stat-gold reveal">
+        <span class="stat-label">Blockchain records</span>
+        <strong class="stat-value">{{ stats.on_chain }}</strong>
+        <span class="stat-note">Confirmed on-chain anchors</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-tight">
+  <div class="shell">
+    <div class="chart-grid">
+
+      {# ---------------------------------------------------------------- #}
+      {# 1. Prediction distribution                                       #}
+      {# ---------------------------------------------------------------- #}
+      <div class="card reveal">
+        <div class="card-head">
+          <h2>Prediction distribution</h2>
+          <span class="muted text-sm">{{ total }} records</span>
+        </div>
+
+        {% if total %}
+        <div class="donut-wrap">
+          <svg class="donut" viewBox="0 0 120 120" role="img"
+               aria-label="Prediction distribution: {{ stats.real }} real, {{ stats.fake }} fake">
+            <g transform="rotate(-90 60 60)">
+              <circle class="donut-track" cx="60" cy="60" r="52"/>
+              <circle class="donut-real" cx="60" cy="60" r="52"
+                      stroke-dasharray="{{ real_len }} {{ C - real_len }}"/>
+              <circle class="donut-fake" cx="60" cy="60" r="52"
+                      stroke-dasharray="{{ fake_len }} {{ C - fake_len }}"
+                      stroke-dashoffset="{{ -real_len }}"/>
+            </g>
+          </svg>
+
+          <div class="donut-legend">
+            <span class="legend-key"><i class="legend-swatch legend-real"></i>
+              Real — {{ stats.real }} ({{ (stats.real / total * 100) | round(1) }}%)</span>
+            <span class="legend-key"><i class="legend-swatch legend-fake"></i>
+              Fake — {{ stats.fake }} ({{ (stats.fake / total * 100) | round(1) }}%)</span>
+            <span class="muted">Average model confidence:
+              <strong>{{ (stats.avg_confidence * 100) | round(1) }}%</strong></span>
+          </div>
+        </div>
+        {% else %}
+          <p class="empty-state">No classifications yet — the distribution will appear
+             after the first analysis.</p>
+        {% endif %}
+      </div>
+
+      {# ---------------------------------------------------------------- #}
+      {# 2. Record anchoring status                                       #}
+      {# ---------------------------------------------------------------- #}
+      <div class="card reveal">
+        <div class="card-head">
+          <h2>Source status</h2>
+          <span class="muted text-sm">{{ stats.ledger_entries }} ledger entries</span>
+        </div>
+
+        <div class="bar-chart">
+          <div class="bar-row">
+            <span>On-chain</span>
+            <span class="bar-track"><i class="bar-fill bar-chain"
+                 style="--w: {{ (stats.on_chain / total * 100) if total else 0 }}%"></i></span>
+            <span class="bar-value">{{ stats.on_chain }}</span>
+          </div>
+          <div class="bar-row">
+            <span>Local ledger</span>
+            <span class="bar-track"><i class="bar-fill bar-local"
+                 style="--w: {{ (stats.local_records / total * 100) if total else 0 }}%"></i></span>
+            <span class="bar-value">{{ stats.local_records }}</span>
+          </div>
+        </div>
+
+        <hr>
+        <p class="card-title">Recent analyses by confidence</p>
+        <div class="bar-chart">
+          {% for item in stats.recent[:5] %}
+          <div class="bar-row">
+            <span class="cell-mono">{{ item.id }}</span>
+            <span class="bar-track"><i class="bar-fill {{ 'bar-chain' if item.prediction == 'REAL' else 'bar-local' }}"
+                 style="--w: {{ (item.confidence * 100) | round(1) }}%"></i></span>
+            <span class="bar-value">{{ (item.confidence * 100) | round(1) }}%</span>
+          </div>
+          {% else %}
+            <p class="muted text-sm">No recent analyses to chart.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      {# ---------------------------------------------------------------- #}
+      {# 3. Blockchain verification status                                #}
+      {# ---------------------------------------------------------------- #}
+      <div class="card reveal">
+        <div class="card-head">
+          <h2>Blockchain verification</h2>
+        </div>
+
+        <div class="chain-status">
+          <span class="dot {{ 'dot-ok' if chain.blockchain.connected else 'dot-warn' }}"></span>
+          <span>
+            {% if chain.blockchain.connected %}
+              Connected to <code>{{ chain.blockchain.rpc_url }}</code>
+              (chain id {{ chain.blockchain.chain_id }})
+            {% else %}
+              <strong>Ethereum node unreachable</strong> —
+              {{ chain.blockchain.reason if chain.blockchain.reason is defined else 'RPC endpoint not available' }}
+            {% endif %}
+          </span>
+        </div>
+
+        <p class="notice-bar {{ 'notice-warn' if not stats.blockchain_available else 'notice-ok' }}">
+          {{ icon('chain', 16) }}
+          <span>
+            {% if stats.blockchain_available %}
+              On-chain anchoring is active. New records will be written to the smart contract.
+            {% else %}
+              <strong>Blockchain verification unavailable.</strong>
+              {{ stats.on_chain }} of {{ total }} records carry a confirmed transaction.
+              All {{ stats.total }} records remain protected by the SHA-256 integrity ledger.
+            {% endif %}
+          </span>
+        </p>
+
+        <table class="kv-list">
+          <tr><th>Local ledger</th>
+              <td><span class="status-line"><span class="dot dot-ok"></span>
+                  {{ chain.local.network }}</span></td></tr>
+          <tr><th>Ledger entries</th><td>{{ stats.ledger_entries }}</td></tr>
+          <tr><th>Hash algorithm</th><td>SHA-256</td></tr>
+          <tr><th>Avg. confidence</th>
+              <td>{{ (stats.avg_confidence * 100) | round(1) }}%</td></tr>
+        </table>
+
+        <div class="actions mt-lg">
+          <a class="btn btn-outline btn-sm" href="{{ url_for('verify') }}">Verify a record</a>
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('api_stats') }}">Stats JSON</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="section-tight">
+  <div class="shell">
+    {{ section_heading("Recent analysis", kicker="Newsroom desk log") }}
+
+    {% if stats.recent %}
+    <div class="card">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="cell-hide-tiny">Time</th>
+              <th>Headline</th>
+              <th>Prediction</th>
+              <th class="cell-hide-narrow">Confidence</th>
+              <th>Source</th>
+              <th scope="col"><span class="sr-only">Record links</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in stats.recent %}
+            <tr>
+              <td class="cell-time cell-hide-tiny">
+                {{ item.created_at[:16].replace('T', ' ') if item.created_at else '—' }}
+              </td>
+              <td class="cell-headline" title="{{ item.headline }}">{{ item.headline }}</td>
+              <td>{{ verdict_badge(item.prediction) }}</td>
+              <td class="cell-hide-narrow">{{ (item.confidence * 100) | round(1) }}%</td>
+              <td>
+                {% if item.source.on_chain %}
+                  <span class="badge badge-onchain">Blockchain</span>
+                {% elif item.source.code == 'none' %}
+                  <span class="badge badge-none">No record</span>
+                {% elif item.source.code == 'pending' %}
+                  <span class="badge badge-onchain">Tx pending</span>
+                {% else %}
+                  <span class="badge badge-local">Local ledger</span>
+                {% endif %}
+              </td>
+              <td class="cell-links">
+                <a href="{{ url_for('result', prediction_id=item.numeric_id) }}">report</a>
+                <a href="{{ url_for('trace', prediction_id=item.numeric_id) }}">trace</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+      <div class="card empty-state">
+        <p>No classifications yet. Submit a story to start the newsroom log.</p>
+        <a class="btn btn-accent" href="{{ url_for('analyze') }}">Analyze a story</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

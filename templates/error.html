@@ -1,12 +1,18 @@
 {% extends "base.html" %}
-{% block title %}{{ code }} · Fake News Detection{% endblock %}
+{% from "_macros.html" import icon %}
+{% block title %}{{ code }} · TRUTHLINE{% endblock %}
 
 {% block content %}
-<section class="hero">
-  <h1>{{ code }}</h1>
-  <p class="lead">{{ message }}</p>
-  <div class="actions">
-    <a class="btn btn-primary" href="{{ url_for('home') }}">Back to home</a>
+<section class="section">
+  <div class="shell center">
+    <span class="kicker">{{ 'Editorial notice' if code == 404 else 'Technical fault' }}</span>
+    <h1>{{ code }}</h1>
+    <p class="lead">{{ message }}</p>
+    <div class="actions actions-center">
+      <a class="btn btn-accent" href="{{ url_for('home') }}">Back to the front page</a>
+      <a class="btn btn-outline" href="{{ url_for('analyze') }}">Analyze a story</a>
+      <a class="btn btn-ghost" href="{{ url_for('dashboard') }}">Dashboard</a>
+    </div>
   </div>
 </section>
 {% endblock %}
