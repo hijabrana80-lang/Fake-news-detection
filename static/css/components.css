@@ -180,6 +180,8 @@
   color: var(--burgundy);
   margin-bottom: .5rem;
 }
+/* Gold variant for dark sections — must beat .kicker (same file, later). */
+.kicker.kicker-light { color: #e6c987; }
 
 .section-title {
   font-size: clamp(1.35rem, 2.4vw, 1.85rem);

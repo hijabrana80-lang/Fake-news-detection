@@ -125,7 +125,6 @@ main { flex: 1; display: block; }
 .mb-sm { margin-bottom: .35rem; }
 .mt-lg { margin-top: 1.6rem; }
 .actions-center { justify-content: center; }
-.kicker-light { color: #e6c987; }
 .lead { color: var(--charcoal); max-width: 44rem; margin-inline: auto; font-size: 1.06rem; }
 .lead-on-ink { color: #b9c0d2; max-width: 40rem; margin: 0 auto 1.6rem; font-size: 1.02rem; }
 .sr-only {

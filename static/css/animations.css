@@ -249,6 +249,8 @@ main {
 .grid > .reveal:nth-child(2) { --reveal-delay: .09s; }
 .grid > .reveal:nth-child(3) { --reveal-delay: .18s; }
 .grid > .reveal:nth-child(4) { --reveal-delay: .27s; }
+.grid > .reveal:nth-child(5) { --reveal-delay: .36s; }
+.grid > .reveal:nth-child(6) { --reveal-delay: .45s; }
 .stat-grid > .reveal:nth-child(2) { --reveal-delay: .09s; }
 .stat-grid > .reveal:nth-child(3) { --reveal-delay: .18s; }
 .stat-grid > .reveal:nth-child(4) { --reveal-delay: .27s; }
@@ -258,8 +260,11 @@ main {
 .chart-grid > .reveal:nth-child(2) { --reveal-delay: .12s; }
 .chart-grid > .reveal:nth-child(3) { --reveal-delay: .24s; }
 .compare > .reveal:nth-child(2) { --reveal-delay: .12s; }
-.trust-strip > .reveal:nth-child(2) { --reveal-delay: .1s; }
-.trust-strip > .reveal:nth-child(3) { --reveal-delay: .2s; }
+.factcheck > .reveal:nth-child(2) { --reveal-delay: .14s; }
+.bc-flow > .reveal:nth-child(2) { --reveal-delay: .08s; }
+.bc-flow > .reveal:nth-child(3) { --reveal-delay: .16s; }
+.bc-flow > .reveal:nth-child(4) { --reveal-delay: .24s; }
+.bc-flow > .reveal:nth-child(5) { --reveal-delay: .32s; }
 .chain-list > .reveal:nth-child(2) { --reveal-delay: .1s; }
 .chain-list > .reveal:nth-child(3) { --reveal-delay: .2s; }
 .chain-list > .reveal:nth-child(4) { --reveal-delay: .3s; }
@@ -308,6 +313,14 @@ main {
 .hero-meta {
   animation: hero-el .7s .85s var(--ease-out) backwards;
 }
+/* Trust ticker follows the hero copy, item by item (sequence ends < 1.5s). */
+.ticker li {
+  animation: hero-el .45s var(--ease-out) backwards;
+}
+.ticker li:nth-child(1) { animation-delay: .9s; }
+.ticker li:nth-child(2) { animation-delay: .96s; }
+.ticker li:nth-child(3) { animation-delay: 1.02s; }
+.ticker li:nth-child(4) { animation-delay: 1.08s; }
 
 @keyframes hero-el {
   from { opacity: 0; transform: translate3d(0, 20px, 0); }

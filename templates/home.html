@@ -74,32 +74,100 @@
   </div>
 
   <div class="shell">
-    <div class="trust-strip">
-      <div class="trust-item reveal">
-        {{ icon('spark', 22) }}
-        <div>
-          <h2>AI linguistic analysis</h2>
-          <p>TF-IDF features and writing-style statistics trained on labelled news articles.</p>
-        </div>
+    <ul class="ticker" aria-label="Platform capabilities">
+      <li>{{ icon('spark', 15) }} AI-Powered Analysis</li>
+      <li>{{ icon('hash', 15) }} Source Traceability</li>
+      <li>{{ icon('chain', 15) }} Blockchain Verification</li>
+      <li>{{ icon('check', 15) }} Transparent Results</li>
+    </ul>
+  </div>
+</section>
+
+{# ------------------------------------------------------------------ #}
+{# How it works — six-stage pipeline                                   #}
+{# ------------------------------------------------------------------ #}
+<section class="section">
+  <div class="shell">
+    {{ section_heading("How the system works", kicker="Six-stage pipeline") }}
+
+    <div class="grid grid-3">
+      <div class="card reveal">
+        <p class="card-title">01 — Submit</p>
+        <h3>Paste the story</h3>
+        <p class="muted">A headline or full article enters the analysis workspace.</p>
       </div>
-      <div class="trust-item reveal">
-        {{ icon('hash', 22) }}
-        <div>
-          <h2>Tamper-evident ledger</h2>
-          <p>Every verdict is chained to the previous record with a SHA-256 content hash.</p>
-        </div>
+      <div class="card reveal">
+        <p class="card-title">02 — Analyze</p>
+        <h3>AI reads the language</h3>
+        <p class="muted">Text is normalised, vectorised and scored against the trained model.</p>
       </div>
-      <div class="trust-item reveal">
-        {{ icon('scale', 22) }}
-        <div>
-          <h2>Claim against evidence</h2>
-          <p>Model output is presented as a prediction — never as a statement of fact.</p>
-        </div>
+      <div class="card reveal">
+        <p class="card-title">03 — Predict</p>
+        <h3>Fake or real, with a score</h3>
+        <p class="muted">The classifier returns a label and the probability behind it.</p>
       </div>
+      <div class="card reveal">
+        <p class="card-title">04 — Hash</p>
+        <h3>Fingerprint the text</h3>
+        <p class="muted">SHA-256 turns the article into a permanent content fingerprint.</p>
+      </div>
+      <div class="card reveal">
+        <p class="card-title">05 — Record</p>
+        <h3>Write the ledger entry</h3>
+        <p class="muted">The verdict is chained to the previous record — anchored on-chain when available.</p>
+      </div>
+      <div class="card reveal">
+        <p class="card-title">06 — Verify</p>
+        <h3>Trace the source</h3>
+        <p class="muted">Anyone can re-check the record later and confirm nothing changed.</p>
+      </div>
+    </div>
+
+    <div class="actions mt-lg">
+      <a class="btn btn-primary" href="{{ url_for('how_it_works') }}">See the full pipeline</a>
     </div>
   </div>
 </section>
 
+{# ------------------------------------------------------------------ #}
+{# Feature set                                                         #}
+{# ------------------------------------------------------------------ #}
+<section class="section section-alt">
+  <div class="shell">
+    {{ section_heading("Built for verification", kicker="Feature set") }}
+
+    <div class="grid grid-4">
+      <article class="card feature-card reveal">
+        <span class="feature-icon" aria-hidden="true">{{ icon('spark', 20) }}</span>
+        <h3>AI news detection</h3>
+        <p class="muted">Linguistic patterns and writing-style statistics are scored by a
+           trained NLP classifier.</p>
+      </article>
+      <article class="card feature-card reveal">
+        <span class="feature-icon" aria-hidden="true">{{ icon('hash', 20) }}</span>
+        <h3>Source traceability</h3>
+        <p class="muted">Every submission gets a SHA-256 cryptographic fingerprint tied to
+           its exact text.</p>
+      </article>
+      <article class="card feature-card reveal">
+        <span class="feature-icon" aria-hidden="true">{{ icon('chain', 20) }}</span>
+        <h3>Blockchain verification</h3>
+        <p class="muted">Records anchor to an Ethereum-compatible contract whenever a node
+           is reachable.</p>
+      </article>
+      <article class="card feature-card reveal">
+        <span class="feature-icon" aria-hidden="true">{{ icon('check', 20) }}</span>
+        <h3>Transparent results</h3>
+        <p class="muted">Prediction, confidence, hash and record status are shown plainly —
+           nothing hidden.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+{# ------------------------------------------------------------------ #}
+{# Latest analysis — real records from the database                    #}
+{# ------------------------------------------------------------------ #}
 <section class="section">
   <div class="shell">
     {{ section_heading("Latest analysis", kicker="From the newsroom desk") }}
@@ -130,46 +198,111 @@
   </div>
 </section>
 
+{# ------------------------------------------------------------------ #}
+{# Fact check — claim versus evidence                                  #}
+{# ------------------------------------------------------------------ #}
 <section class="section section-alt">
-  <div class="shell">
-    {{ section_heading("How the system works", kicker="Pipeline overview") }}
-    <div class="grid grid-4">
-      <div class="card reveal">
-        <p class="card-title">01 — Submit</p>
-        <h3>Paste the story</h3>
-        <p class="muted">A headline or full article is submitted through the analysis workspace.</p>
-      </div>
-      <div class="card reveal">
-        <p class="card-title">02 — Analyze</p>
-        <h3>AI reads the language</h3>
-        <p class="muted">Text is normalised, vectorised and scored against the trained model.</p>
-      </div>
-      <div class="card reveal">
-        <p class="card-title">03 — Record</p>
-        <h3>Hash the result</h3>
-        <p class="muted">The article fingerprint and verdict are appended to the integrity ledger.</p>
-      </div>
-      <div class="card reveal">
-        <p class="card-title">04 — Verify</p>
-        <h3>Trace the source</h3>
-        <p class="muted">Anyone can re-check the record later and confirm nothing changed.</p>
-      </div>
+  <div class="shell factcheck">
+    <div class="factcheck-copy reveal">
+      <span class="kicker">Claim vs evidence</span>
+      <h2>Weigh the claim against the evidence.</h2>
+      <p class="muted">Every report separates what the story states from what the model
+         actually measured — the balance stays visible instead of hiding behind a single
+         verdict.</p>
+      <ul class="side-list">
+        <li>{{ icon('news', 16) }}<span><strong>Claim</strong> — the headline and article
+            text you submitted.</span></li>
+        <li>{{ icon('spark', 16) }}<span><strong>Evidence</strong> — the linguistic features
+            the model examined.</span></li>
+        <li>{{ icon('scale', 16) }}<span><strong>Verdict</strong> — a labelled prediction
+            with its probability, never a ruling of fact.</span></li>
+      </ul>
     </div>
-    <div class="actions mt-lg">
-      <a class="btn btn-primary" href="{{ url_for('how_it_works') }}">See the full pipeline</a>
+
+    <div class="card factcheck-scale reveal">
+      <div class="balance">
+        <span class="balance-side"><strong>Claim</strong><span>what is stated</span></span>
+        {{ icon('scale', 30) }}
+        <span class="balance-side"><strong>Evidence</strong><span>what the model saw</span></span>
+      </div>
+      <p class="notice-bar notice-info">
+        {{ icon('shield', 16) }}
+        <span>The output is an <strong>AI model prediction</strong> about writing patterns —
+        not a statement that the content is true or false.</span>
+      </p>
     </div>
   </div>
 </section>
 
-<section class="section section-ink">
+{# ------------------------------------------------------------------ #}
+{# Blockchain record — dark premium section                            #}
+{# ------------------------------------------------------------------ #}
+<section class="section section-ink bc-section">
+  <div class="shell">
+    <div class="section-head reveal">
+      <span class="kicker kicker-light">Immutable record</span>
+      <h2 class="section-title">From article to verifiable record</h2>
+      <span class="section-rule" aria-hidden="true"></span>
+    </div>
+
+    <ol class="bc-flow">
+      <li class="bc-node reveal">
+        {{ icon('news', 20) }}
+        <strong>Article</strong>
+        <span>submitted text</span>
+      </li>
+      <li class="bc-node reveal">
+        {{ icon('hash', 20) }}
+        <strong>Hash</strong>
+        <span>SHA-256 fingerprint</span>
+      </li>
+      <li class="bc-node reveal">
+        {{ icon('chain', 20) }}
+        <strong>Blockchain</strong>
+        <span>contract anchor</span>
+      </li>
+      <li class="bc-node reveal">
+        {{ icon('nodes', 20) }}
+        <strong>Transaction</strong>
+        <span>signed &amp; confirmed</span>
+      </li>
+      <li class="bc-node reveal">
+        {{ icon('shield', 20) }}
+        <strong>Verification</strong>
+        <span>re-check anytime</span>
+      </li>
+    </ol>
+
+    {% if chain.blockchain.connected %}
+      <p class="notice-bar notice-ok bc-note">
+        {{ icon('check', 16) }}
+        <span>On-chain anchoring is active via <code>{{ chain.blockchain.rpc_url }}</code>
+        (chain id {{ chain.blockchain.chain_id }}) — new records are written to the smart
+        contract.</span>
+      </p>
+    {% else %}
+      <p class="notice-bar notice-warn bc-note">
+        {{ icon('chain', 16) }}
+        <span><strong>Blockchain verification unavailable.</strong> No Ethereum node is
+        reachable, so records are held in the tamper-evident local hash chain instead —
+        no transaction is claimed until one is confirmed.</span>
+      </p>
+    {% endif %}
+  </div>
+</section>
+
+{# ------------------------------------------------------------------ #}
+{# Final CTA                                                           #}
+{# ------------------------------------------------------------------ #}
+<section class="section section-ink cta-section">
   <div class="shell center">
-    <h2>Ready to check a story?</h2>
+    <h2>Don&rsquo;t Just Read the News. Verify It.</h2>
     <p class="lead-on-ink">
       Submit an article to the analysis workspace and get a fact-check report with a
       traceability record you can re-verify at any time.
     </p>
     <div class="actions actions-center">
-      <a class="btn btn-gold btn-lg" href="{{ url_for('analyze') }}">Check a News Story</a>
+      <a class="btn btn-gold btn-lg" href="{{ url_for('analyze') }}">Analyze a Story</a>
       <a class="btn btn-outline btn-lg btn-outline-light" href="{{ url_for('verify') }}">
         Verify a Source
       </a>
